@@ -20,7 +20,7 @@ class LoginForm extends StatefulWidget {
 
 class _LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
-  bool _autoValidate = false, _loading = false;
+  bool _autoValidate = false, _loading = false, _showPassword = false;
   TextEditingController _emailController, _passwordController;
   // String _email, _password;
 
@@ -61,7 +61,7 @@ class _LoginFormState extends State<LoginForm> {
                     child: TextFormField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
-                      decoration: roundedTFDecoration(hintText: 'Email'),
+                      decoration: roundedTFDecoration(hintText: 'Email', prefixIcon: Icons.mail_outline),
                       validator: (value) {
                         if (Validation.emptyCheck(value.trim()))
                           return 'Please Enter Email';
@@ -69,15 +69,20 @@ class _LoginFormState extends State<LoginForm> {
                           return 'Invalid Email';
                         return null;
                       },
-                      // onChanged: (value) => _email = value.trim(),
                     ),
                   ),
                   RoundedTextField(
                     child: TextFormField(
                       controller: _passwordController,
                       keyboardType: TextInputType.text,
-                      obscureText: true,
-                      decoration: roundedTFDecoration(hintText: 'Password'),
+                      obscureText: _showPassword,
+                      decoration: roundedTFDecoration(
+                          hintText: 'Password', prefixIcon: Icons.lock_outline,
+                          suffixAction: () =>
+                              setState(() => _showPassword = !_showPassword),
+                          suffixIcon: _showPassword
+                              ? Icons.visibility_off
+                              : Icons.visibility),
                       validator: (value) {
                         if (Validation.emptyCheck(value.trim()))
                           return 'Please Enter Password';

@@ -26,7 +26,7 @@ class _AuthScreenState extends State<AuthScreen> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                SizedBox(height: 150),
+                SizedBox(height: 80),
                 Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: FittedBox(

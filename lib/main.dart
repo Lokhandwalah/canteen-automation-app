@@ -19,10 +19,11 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
           brightness: Brightness.light,
+          scaffoldBackgroundColor: bg,
           primaryColor: primary,
           accentColor: primary,
           cursorColor: primary,
-          primarySwatch: Colors.pink,
+          primarySwatch: Colors.orange,
           visualDensity: VisualDensity.adaptivePlatformDensity),
       home: SplashScreen(),
       routes: {

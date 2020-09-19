@@ -8,6 +8,7 @@ abstract class BaseAuth {
   User getCurrentUser();
   bool isUserLoggedIn();
   Future signUp(UserData user);
+  Future googleSignUp();
   Future sigIn(String email, String password);
   Future googleSignIn();
   Future signOut();
@@ -113,6 +114,37 @@ class AuthService extends BaseAuth {
       String msg = exceptionHandler
           .getExceptionMessage(exceptionHandler.getAuthStatus(e));
       return {'success': false, 'msg': msg};
+    }
+  }
+
+  @override
+  Future<Map> googleSignUp() async {
+    final GoogleSignIn googleSignIn = new GoogleSignIn();
+    GoogleSignInAccount googleUser;
+    GoogleSignInAuthentication googleAuth;
+    try {
+      try {
+        googleUser = await googleSignIn.signIn();
+        googleAuth = await googleUser.authentication;
+      } catch (e) {
+        print(e.toString());
+        return {"success": false, 'msg': 'Google Signin Cancelled'};
+      }
+      final userDoc = await DBService().getUserDoc(googleUser.email);
+      if (userDoc != null) {
+        await googleSignIn.signOut();
+        return {
+          "success": false,
+          'msg': exceptionHandler
+              .getExceptionMessage(AuthResultStatus.emailAlreadyExists)
+        };
+      }
+      return {'success': true, 'email': googleUser.email, 'name': googleUser.displayName};
+    } catch (e) {
+      print(e.toString());
+      String msg = exceptionHandler
+          .getExceptionMessage(exceptionHandler.getAuthStatus(e));
+      return {"success": false, 'msg': msg};
     }
   }
 }

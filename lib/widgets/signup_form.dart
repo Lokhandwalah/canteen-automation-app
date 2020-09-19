@@ -1,10 +1,13 @@
+import 'package:canteen/models/user.dart';
 import 'package:canteen/screens/home.dart';
 import 'package:canteen/services/authentication.dart';
+import 'package:canteen/services/database.dart';
 import 'package:canteen/utilities/constants.dart';
 import 'package:canteen/utilities/validation.dart';
 import 'package:canteen/widgets/custom_textfield.dart';
 import 'package:flip_card/flip_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 
 import 'custom_button.dart';
@@ -19,9 +22,14 @@ class SignupForm extends StatefulWidget {
 
 class _SignupFormState extends State<SignupForm> {
   final _formKey = GlobalKey<FormState>();
-  bool _autoValidate = false, _loading = false;
-  TextEditingController _nameController, _emailController, _passwordController;
-  // String _email, _password;
+  bool _autoValidate = false, _loading = false, _showPassword = false;
+  TextEditingController _nameController,
+      _emailController,
+      _passwordController,
+      _confirmController,
+      _phoneController;
+  UserType userType = UserType.student;
+  String _name, _email, _password, _phone;
 
   @override
   void initState() {
@@ -29,6 +37,8 @@ class _SignupFormState extends State<SignupForm> {
     _nameController = TextEditingController();
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
+    _phoneController = TextEditingController();
+    _confirmController = TextEditingController();
   }
 
   @override
@@ -36,6 +46,8 @@ class _SignupFormState extends State<SignupForm> {
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
@@ -62,7 +74,8 @@ class _SignupFormState extends State<SignupForm> {
                     child: TextFormField(
                       controller: _nameController,
                       keyboardType: TextInputType.name,
-                      decoration: roundedTFDecoration(hintText: 'Name'),
+                      decoration: roundedTFDecoration(
+                          hintText: 'Name', prefixIcon: Icons.person_outline),
                       validator: (value) {
                         if (Validation.emptyCheck(value.trim()))
                           return 'Please Enter Name';
@@ -70,13 +83,15 @@ class _SignupFormState extends State<SignupForm> {
                           return 'Name is too short';
                         return null;
                       },
+                      onChanged: (value) => _name = value.trim(),
                     ),
                   ),
                   RoundedTextField(
                     child: TextFormField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
-                      decoration: roundedTFDecoration(hintText: 'Email'),
+                      decoration: roundedTFDecoration(
+                          hintText: 'Email', prefixIcon: Icons.mail_outline),
                       validator: (value) {
                         if (Validation.emptyCheck(value.trim()))
                           return 'Please Enter Email';
@@ -84,15 +99,41 @@ class _SignupFormState extends State<SignupForm> {
                           return 'Invalid Email';
                         return null;
                       },
-                      // onChanged: (value) => _email = value.trim(),
+                      onChanged: (value) => _email = value.trim(),
+                    ),
+                  ),
+                  RoundedTextField(
+                    child: TextFormField(
+                      controller: _phoneController,
+                      keyboardType: TextInputType.phone,
+                      inputFormatters: [
+                        WhitelistingTextInputFormatter.digitsOnly
+                      ],
+                      decoration: roundedTFDecoration(
+                          hintText: 'Phone', prefixIcon: Icons.phone),
+                      validator: (value) {
+                        if (Validation.emptyCheck(value.trim()))
+                          return 'Please Enter Phone No';
+                        else if (Validation.lengthCheck(value.trim(), 10))
+                          return 'Must be 10 digits';
+                        return null;
+                      },
+                      onChanged: (value) => _phone = value.trim(),
                     ),
                   ),
                   RoundedTextField(
                     child: TextFormField(
                       controller: _passwordController,
                       keyboardType: TextInputType.text,
-                      obscureText: true,
-                      decoration: roundedTFDecoration(hintText: 'Password'),
+                      obscureText: _showPassword,
+                      decoration: roundedTFDecoration(
+                          hintText: 'Password',
+                          prefixIcon: Icons.lock_outline,
+                          suffixAction: () =>
+                              setState(() => _showPassword = !_showPassword),
+                          suffixIcon: _showPassword
+                              ? Icons.visibility_off
+                              : Icons.visibility),
                       validator: (value) {
                         if (Validation.emptyCheck(value.trim()))
                           return 'Please Enter Password';
@@ -100,9 +141,59 @@ class _SignupFormState extends State<SignupForm> {
                           return 'Minimum 6 characters';
                         return null;
                       },
-                      // onChanged: (value) => _password = value.trim(),
+                      onChanged: (value) => _password = value.trim(),
                     ),
                   ),
+                  RoundedTextField(
+                    child: TextFormField(
+                      keyboardType: TextInputType.text,
+                      controller: _confirmController,
+                      obscureText: true,
+                      decoration: roundedTFDecoration(
+                          hintText: 'Confirm Password',
+                          prefixIcon:
+                              _confirmController.text.trim() == _password
+                                  ? Icons.verified_user
+                                  : Icons.lock_outline),
+                      validator: (value) {
+                        if (Validation.emptyCheck(value.trim()))
+                          return 'Please confirm your Password';
+                        else if (value.trim() != _password)
+                          return 'Passwords don\'t match';
+                        return null;
+                      },
+                      onChanged: (value) => setState(() {}),
+                    ),
+                  ),
+                  Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Radio<UserType>(
+                                  value: UserType.student,
+                                  groupValue: userType,
+                                  onChanged: (type) =>
+                                      setState(() => userType = type)),
+                              Text('Student')
+                            ],
+                          ),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Radio<UserType>(
+                                  value: UserType.faculty,
+                                  groupValue: userType,
+                                  onChanged: (type) =>
+                                      setState(() => userType = type)),
+                              Text('Faculty')
+                            ],
+                          ),
+                        ],
+                      )),
                   _loading
                       ? Column(
                           children: [
@@ -120,7 +211,6 @@ class _SignupFormState extends State<SignupForm> {
                       : Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            SizedBox(height: 10),
                             MyButton(
                                 title: 'Sign Up',
                                 action: () {
@@ -135,7 +225,7 @@ class _SignupFormState extends State<SignupForm> {
                                 textColor: primary,
                                 buttonIcon: Icon(FontAwesome.google_plus,
                                     color: Colors.deepOrangeAccent.shade400),
-                                action: () => _handleSignup(isGoogle: true)),
+                                action: _handleGoogleSignup),
                             SizedBox(height: 15),
                             GestureDetector(
                               onTap: () =>
@@ -145,12 +235,12 @@ class _SignupFormState extends State<SignupForm> {
                                 children: [
                                   RichText(
                                     text: TextSpan(
-                                        text: 'Don\'t have an Account ? ',
+                                        text: 'Already have an Account ? ',
                                         style: TextStyle(
                                             fontSize: 15, color: black),
                                         children: [
                                           TextSpan(
-                                              text: 'Sign Up',
+                                              text: 'Sign In',
                                               style: TextStyle(
                                                   fontSize: 17, color: primary))
                                         ]),
@@ -158,6 +248,7 @@ class _SignupFormState extends State<SignupForm> {
                                 ],
                               ),
                             ),
+                            SizedBox(height: 20)
                           ],
                         ),
                 ],
@@ -169,35 +260,36 @@ class _SignupFormState extends State<SignupForm> {
     );
   }
 
-  _handleSignup({bool isGoogle = false}) async {
+  _handleGoogleSignup() {}
+
+  _handleSignup() async {
     FocusScope.of(context).unfocus();
     setState(() => _loading = true);
-    Map result = isGoogle
-        ? await AuthService().googleSignIn()
-        : await AuthService()
-            .sigIn(_emailController.text, _passwordController.text);
-    await Future.delayed(Duration(seconds: 1));
-    setState(() => _loading = false);
-    bool success = result['success'];
-    String title = success ? 'Login Successful' : 'Error';
-    String content = success ? null : result['msg'];
-    showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (_) => WillPopScope(
-              onWillPop: () => Future.value(!success),
-              child: DialogBox(
-                  title: title,
-                  titleColor: !success ? Colors.red : null,
-                  icon: success ? Icons.verified_user : null,
-                  iconColor: Colors.teal,
-                  description: content,
-                  buttonText1: !success ? 'OK' : null,
-                  button1Func: !success
-                      ? () => Navigator.of(context, rootNavigator: true).pop()
-                      : null),
-            ));
-    if (success) {
+    final user = UserData(
+        name: _name,
+        email: _email,
+        password: _password,
+        phone: '+91' + _phone,
+        type: userType);
+    Map result = await AuthService().signUp(user);
+    if (result['success']) {
+      user.uid = result['uid'];
+      await DBService().createUser(user);
+      await Future.delayed(Duration(seconds: 1));
+      setState(() => _loading = false);
+      showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => DialogBox(
+                title: 'Success',
+                description: 'You have signed up Successfully',
+                icon: Icons.verified_user,
+                iconColor: Colors.teal,
+                buttonText1: null,
+                button1Func: null,
+              ));
+    }
+    if (result['success']) {
       await Future.delayed(Duration(seconds: 2));
       Navigator.of(context, rootNavigator: true).pop();
       Navigator.of(context).pushReplacement(goTo(MainScreen()));

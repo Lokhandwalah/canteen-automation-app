@@ -52,8 +52,12 @@ InputDecoration roundedTFDecoration(
       contentPadding: const EdgeInsets.all(16),
       fillColor: white,
       filled: true,
-      prefixIcon: Icon(prefixIcon, color: iconColor ?? primary),
-      suffixIcon: GestureDetector(
-          onTap: suffixAction,
-          child: Icon(suffixIcon, color: iconColor ?? primary)));
+      prefixIcon: prefixIcon != null
+          ? Icon(prefixIcon, color: iconColor ?? primary)
+          : null,
+      suffixIcon: suffixIcon != null
+          ? GestureDetector(
+              onTap: suffixAction,
+              child: Icon(suffixIcon, color: iconColor ?? primary))
+          : null);
 }
