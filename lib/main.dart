@@ -1,10 +1,15 @@
+import 'package:canteen/models/user.dart';
+import 'package:canteen/screens/account/account.dart';
 import 'package:canteen/services/authentication.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'screens/cart/cart.dart';
 import 'utilities/constants.dart';
-import 'screens/home.dart';
+import 'screens/menu/home.dart';
 import 'screens/auth_screen.dart';
 
 void main() {
@@ -28,7 +33,9 @@ class MyApp extends StatelessWidget {
       home: SplashScreen(),
       routes: {
         '/home': (context) => MainScreen(),
-        '/auth': (context) => AuthScreen()
+        '/auth': (context) => AuthScreen(),
+        '/cart': (context) => MyCart(),
+        '/account': (context) => MyAccount()
       },
     );
   }
@@ -42,9 +49,18 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   void _navigateHome() async {
     await Future.delayed(Duration(seconds: 3));
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     bool isLoggedIn = AuthService().isUserLoggedIn();
+    CurrentUser user;
+    if (isLoggedIn) {
+      print('user is already logged in');
+      user = await UserData.setData(prefs.getString('email'));
+    }
     Navigator.of(context).pushReplacement(PageTransition(
-        child: isLoggedIn ? AuthScreen() : MainScreen(),
+        child: isLoggedIn
+            ? ChangeNotifierProvider<CurrentUser>.value(
+                value: user, child: MainScreen())
+            : AuthScreen(),
         type: rightToLeft,
         duration: Duration(milliseconds: 500)));
   }
@@ -65,10 +81,12 @@ class _SplashScreenState extends State<SplashScreen> {
           alignment: Alignment.center,
           children: [
             CircleAvatar(
+              backgroundColor: primary,
               radius: 50,
               child: Icon(
                 Icons.fastfood,
                 size: 50,
+                color: white,
               ),
             ),
             Positioned(

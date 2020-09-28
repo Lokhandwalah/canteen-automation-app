@@ -1,5 +1,6 @@
-import 'package:canteen/screens/forgot_password.dart';
-import 'package:canteen/screens/home.dart';
+import 'package:canteen/models/user.dart';
+import 'package:canteen/screens/user_auth/forgot_password.dart';
+import 'package:canteen/screens/menu/home.dart';
 import 'package:canteen/services/authentication.dart';
 import 'package:canteen/utilities/constants.dart';
 import 'package:canteen/utilities/validation.dart';
@@ -10,6 +11,7 @@ import 'package:flip_card/flip_card.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:provider/provider.dart';
 
 class LoginForm extends StatefulWidget {
   final GlobalKey<FlipCardState> flipkey;
@@ -61,7 +63,8 @@ class _LoginFormState extends State<LoginForm> {
                     child: TextFormField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
-                      decoration: roundedTFDecoration(hintText: 'Email', prefixIcon: Icons.mail_outline),
+                      decoration: roundedTFDecoration(
+                          hintText: 'Email', prefixIcon: Icons.mail_outline),
                       validator: (value) {
                         if (Validation.emptyCheck(value.trim()))
                           return 'Please Enter Email';
@@ -77,7 +80,8 @@ class _LoginFormState extends State<LoginForm> {
                       keyboardType: TextInputType.text,
                       obscureText: _showPassword,
                       decoration: roundedTFDecoration(
-                          hintText: 'Password', prefixIcon: Icons.lock_outline,
+                          hintText: 'Password',
+                          prefixIcon: Icons.lock_outline,
                           suffixAction: () =>
                               setState(() => _showPassword = !_showPassword),
                           suffixIcon: _showPassword
@@ -182,6 +186,7 @@ class _LoginFormState extends State<LoginForm> {
     bool success = result['success'];
     String title = success ? 'Login Successful' : 'Error';
     String content = success ? null : result['msg'];
+    CurrentUser currentUser;
     showDialog(
         context: context,
         barrierDismissible: false,
@@ -200,8 +205,11 @@ class _LoginFormState extends State<LoginForm> {
             ));
     if (success) {
       await Future.delayed(Duration(seconds: 2));
+      currentUser = result['current'];
       Navigator.of(context, rootNavigator: true).pop();
-      Navigator.of(context).pushReplacement(goTo(MainScreen()));
+      Navigator.of(context).pushReplacement(goTo(
+          ChangeNotifierProvider<CurrentUser>.value(
+              value: currentUser, child: MainScreen())));
     }
   }
 }

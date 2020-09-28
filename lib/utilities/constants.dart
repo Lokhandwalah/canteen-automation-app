@@ -32,3 +32,8 @@ Route goTo(Widget screen, [fullscreenDialog = false]) {
 Widget loader() => Platform.isIOS
     ? CupertinoActivityIndicator(radius: 20)
     : CircularProgressIndicator(strokeWidth: 2);
+
+// image slider photo urls
+List<String> imageList = [
+  'https://www.thespruceeats.com/thmb/XDmwhz9HXEMxhus08YhlIvTuAZI=/3865x2174/smart/filters:no_upscale()/paneer-makhani-or-shahi-paneer-indian-food-670906899-5878ef725f9b584db3d890f4.jpg',
+  ];

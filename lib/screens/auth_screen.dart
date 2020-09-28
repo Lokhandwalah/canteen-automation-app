@@ -1,6 +1,6 @@
 import 'package:canteen/utilities/constants.dart';
-import 'package:canteen/widgets/login_form.dart';
-import 'package:canteen/widgets/signup_form.dart';
+import 'package:canteen/screens/user_auth/login_form.dart';
+import 'package:canteen/screens/user_auth/signup_form.dart';
 import 'package:flip_card/flip_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

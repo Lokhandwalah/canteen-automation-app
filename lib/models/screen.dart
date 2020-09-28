@@ -1,9 +1,8 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import '../screens/account.dart';
-import '../screens/cart.dart';
-import '../screens/home.dart';
+import '../screens/account/account.dart';
+import '../screens/cart/cart.dart';
+import '../screens/menu/home.dart';
 
 class Screen {
   final IconData icon, activeIcon;

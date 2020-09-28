@@ -22,7 +22,7 @@ class AuthService extends BaseAuth {
   User getCurrentUser() => _auth.currentUser;
 
   @override
-  bool isUserLoggedIn() => getCurrentUser() == null;
+  bool isUserLoggedIn() => getCurrentUser() != null;
 
   @override
   Future<Map> googleSignIn() async {
@@ -52,10 +52,11 @@ class AuthService extends BaseAuth {
         idToken: googleAuth.idToken,
       )))
               .user;
-      // await UserData.setData(userDoc.data);
-      return {'success': true, 'user': user};
+      final currentUser = await UserData.setData(user.email, userDoc.data());
+      return {'success': true, 'user': user, "current": currentUser};
     } catch (e) {
       print(e.toString());
+      await googleSignIn.signOut();
       String msg = exceptionHandler
           .getExceptionMessage(exceptionHandler.getAuthStatus(e));
       return {"success": false, 'msg': msg};
@@ -81,7 +82,8 @@ class AuthService extends BaseAuth {
         password: password,
       ))
           .user;
-      return {'success': true, 'user': user};
+      final currentUser = await UserData.setData(email);
+      return {'success': true, 'user': user, 'current': currentUser};
     } catch (e) {
       String msg = exceptionHandler
           .getExceptionMessage(exceptionHandler.getAuthStatus(e));
@@ -93,7 +95,7 @@ class AuthService extends BaseAuth {
   @override
   Future<void> signOut() async {
     try {
-      // await UserData.removeData();
+      await UserData.resetData();
       await GoogleSignIn().signOut();
       await _auth.signOut();
       print('Signed Out');
@@ -139,7 +141,11 @@ class AuthService extends BaseAuth {
               .getExceptionMessage(AuthResultStatus.emailAlreadyExists)
         };
       }
-      return {'success': true, 'email': googleUser.email, 'name': googleUser.displayName};
+      return {
+        'success': true,
+        'email': googleUser.email,
+        'name': googleUser.displayName
+      };
     } catch (e) {
       print(e.toString());
       String msg = exceptionHandler

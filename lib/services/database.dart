@@ -1,3 +1,5 @@
+import 'package:steel_crypt/steel_crypt.dart';
+
 import '../models/user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -16,7 +18,7 @@ class DBService extends Database {
       'name': user.name,
       'email': user.email,
       'uid': user.uid,
-      'password': user.password, //needs to be hashed
+      'password': Hashing.encrypt(user.password), //needs to be hashed
       'phone': user.phone,
       'type': user.type == UserType.student ? 'Student' : 'Faculty',
       'orders': [],
@@ -31,6 +33,12 @@ class DBService extends Database {
     return result.docs.length != 0 ? result.docs[0] : null;
   }
 
+  Future<DocumentSnapshot> getUserDocUsingEmail(String email) async {
+    final result =
+        await userCollection.doc(email).get();
+    return result;
+  }
+
   @override
   Future<void> updateUserInfo(Map userInfo, String email) async {
     final userRef = db.collection('users').doc('email');
@@ -38,4 +46,9 @@ class DBService extends Database {
       transaction.update(userRef, userInfo);
     });
   }
+}
+
+class Hashing {
+  static final hasher = HashCrypt('SHA-3/512');
+  static String encrypt(String text) => hasher.hash(text);
 }

@@ -1,5 +1,5 @@
 import 'package:canteen/models/user.dart';
-import 'package:canteen/screens/home.dart';
+import 'package:canteen/screens/menu/home.dart';
 import 'package:canteen/services/authentication.dart';
 import 'package:canteen/services/database.dart';
 import 'package:canteen/utilities/constants.dart';
@@ -9,9 +9,10 @@ import 'package:flip_card/flip_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:provider/provider.dart';
 
-import 'custom_button.dart';
-import 'dialog_box.dart';
+import '../../widgets/custom_button.dart';
+import '../../widgets/dialog_box.dart';
 
 class SignupForm extends StatefulWidget {
   final GlobalKey<FlipCardState> flipkey;
@@ -290,9 +291,12 @@ class _SignupFormState extends State<SignupForm> {
               ));
     }
     if (result['success']) {
+      CurrentUser currentUser = result['current'];
       await Future.delayed(Duration(seconds: 2));
       Navigator.of(context, rootNavigator: true).pop();
-      Navigator.of(context).pushReplacement(goTo(MainScreen()));
+      Navigator.of(context).pushReplacement(goTo(
+          ChangeNotifierProvider<CurrentUser>.value(
+              value: currentUser, child: MainScreen())));
     }
   }
 }
