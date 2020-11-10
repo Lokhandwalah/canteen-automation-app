@@ -1,4 +1,5 @@
 import 'package:canteen/models/cart.dart';
+import 'package:canteen/models/category.dart';
 import 'package:canteen/models/user.dart';
 import 'package:canteen/screens/account/account.dart';
 import 'package:canteen/services/authentication.dart';
@@ -8,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'models/menu_items.dart';
 import 'screens/cart/cart_screen.dart';
 import 'utilities/constants.dart';
 import 'screens/menu/home.dart';
@@ -53,15 +55,19 @@ class _SplashScreenState extends State<SplashScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool isLoggedIn = AuthService().isUserLoggedIn();
     CurrentUser user;
+    Menu menu = Menu();
     if (isLoggedIn) {
       print('user is already logged in');
       user = await UserData.setData(prefs.getString('email'));
     }
+    await menu.initialize();
+    await Category.initialize();
     Navigator.of(context).pushReplacement(PageTransition(
         child: isLoggedIn
             ? MultiProvider(providers: [
                 ChangeNotifierProvider<CurrentUser>.value(value: user),
                 ChangeNotifierProvider<Cart>.value(value: user.cart),
+                ChangeNotifierProvider<Menu>.value(value: menu),
               ], child: MainScreen())
             : AuthScreen(),
         type: rightToLeft,

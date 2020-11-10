@@ -15,7 +15,7 @@ class _ImageSliderState extends State<ImageSlider> {
   Widget build(BuildContext context) {
     return Column(children: [
       Padding(
-        padding: const EdgeInsets.symmetric(vertical: 20.0),
+        padding: const EdgeInsets.symmetric(vertical: 10.0),
         child: CarouselSlider(
           options: CarouselOptions(
             height: 180.0,
@@ -49,7 +49,7 @@ class _ImageSliderState extends State<ImageSlider> {
         ),
       ),
       Padding(
-        padding: const EdgeInsets.only(bottom: 20.0),
+        padding: const EdgeInsets.only(bottom: 10.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List<Widget>.generate(widget.imgList.length, (index) {

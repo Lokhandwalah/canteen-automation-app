@@ -24,7 +24,7 @@ class MyButton extends StatelessWidget {
         color: buttonColor ?? primary,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16.0),
+          padding: const EdgeInsets.symmetric(vertical: 14.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

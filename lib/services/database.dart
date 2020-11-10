@@ -29,14 +29,12 @@ class DBService extends Database {
 
   @override
   Future<DocumentSnapshot> getUserDoc(String email) async {
-    final result =
-        await users.where('email', isEqualTo: email).limit(1).get();
+    final result = await users.where('email', isEqualTo: email).limit(1).get();
     return result.docs.length != 0 ? result.docs[0] : null;
   }
 
   Future<DocumentSnapshot> getUserDocUsingEmail(String email) async {
-    final result =
-        await users.doc(email).get();
+    final result = await users.doc(email).get();
     return result;
   }
 
@@ -46,6 +44,11 @@ class DBService extends Database {
     await db.runTransaction((transaction) async {
       transaction.update(userRef, userInfo);
     });
+  }
+
+  Future<void> updateCart(String userEmail, Map<String, dynamic> items) async {
+    await db.runTransaction((transaction) async =>
+        transaction.update(users.doc(userEmail), {'cart': items}));
   }
 }
 

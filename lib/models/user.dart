@@ -16,14 +16,13 @@ class UserData {
       [Map<String, dynamic> user]) async {
     if (user == null)
       user = (await DBService().getUserDocUsingEmail(email)).data();
-    print(email);
     SharedPreferences prefs = await SharedPreferences.getInstance();
     print('setting prefs...');
     prefs.setString('name', user['name']);
     prefs.setString('email', user['email']);
     prefs.setString('phone', user['phone']);
     prefs.setString('type', user['type']);
-    return CurrentUser.initialize(user);
+    return CurrentUser.initialize(user, prefs);
   }
 
   static Future<void> resetData() async {
@@ -39,13 +38,13 @@ class UserData {
 class CurrentUser extends UserData with ChangeNotifier {
   Cart cart;
   static CurrentUser user;
-  static CurrentUser initialize(Map<String, dynamic> userDoc) {
+  static CurrentUser initialize(Map<String, dynamic> userDoc, SharedPreferences prefs) {
     print('setting data...');
     user = CurrentUser();
     user.name = userDoc['name'];
     user.email = userDoc['email'];
     user.phone = userDoc['phone'];
-    user.cart = Cart(user: userDoc['email'], items: userDoc['cart']);
+    user.cart = Cart(user: userDoc['email'], items: userDoc['cart'], prefs: prefs);
     return user;
   }
 
