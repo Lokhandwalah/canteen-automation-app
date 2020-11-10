@@ -1,3 +1,4 @@
+import 'package:canteen/models/cart.dart';
 import 'package:flutter/material.dart';
 import 'package:canteen/models/user.dart';
 import 'package:canteen/services/database.dart';
@@ -80,6 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
       'https://cdn.cdnparenting.com/articles/2020/02/26144447/PULAV.jpg'
     ];
     final user = Provider.of<CurrentUser>(context);
+    final cart = Provider.of<Cart>(context);
     return Scaffold(
       appBar: AppBar(
         title: ListTile(
@@ -90,73 +92,146 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(icon: Icon(Icons.notifications), onPressed: () {})
         ],
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Container(child: ImageSlider(imageList)),
-              Center(
-                child: const Text(
-                  'What would you like you order today ?',
-                  style: TextStyle(fontSize: 20, color: black),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: DBService.menu.snapshots(),
+        builder: (_, snapshot) {
+          if (!snapshot.hasData)
+            return Center(child: CircularProgressIndicator());
+          List<MenuItem> items =
+              snapshot.data.docs.map((item) => MenuItem(item)).toList();
+          return CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Container(child: ImageSlider(imageList)),
+                    Center(
+                      child: const Text(
+                        'What would you like you order today ?',
+                        style: TextStyle(fontSize: 20, color: black),
+                      ),
+                    ),
+                    SizedBox(height: 5),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        'Chinese',
+                        'South Indian',
+                        'Snacks',
+                        'Beverages'
+                      ].map((category) {
+                        return Padding(
+                          padding: const EdgeInsets.all(4),
+                          child: Container(
+                            height: 80,
+                            width: MediaQuery.of(context).size.width * 0.2,
+                            decoration: BoxDecoration(
+                                color: primary,
+                                borderRadius: BorderRadius.circular(15)),
+                            child: Center(
+                                child: Text(
+                              category,
+                              style: TextStyle(color: secondary),
+                            )),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
                 ),
               ),
-              SizedBox(height: 5),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: ['Chinese', 'South Indian', 'Snacks', 'Beverages']
-                    .map((category) {
-                  return Padding(
-                    padding: const EdgeInsets.all(4),
-                    child: Container(
-                      height: 80,
-                      width: MediaQuery.of(context).size.width * 0.2,
-                      decoration: BoxDecoration(
-                          color: primary,
-                          borderRadius: BorderRadius.circular(15)),
-                      child: Center(
-                          child: Text(
-                        category,
-                        style: TextStyle(color: secondary),
-                      )),
+              // SliverAppBar(
+              //   pinned: true,
+              //   backgroundColor: bg,
+              //   title: TextFormField(
+              //     decoration: InputDecoration(
+              //         hintText: 'Search Menu',
+              //         prefixIcon: Icon(Icons.search),
+              //         focusedBorder: OutlineInputBorder(
+              //             borderSide: BorderSide(
+              //           style: BorderStyle.solid,
+              //           width: 1,
+              //           color: primary
+              //         ))),
+              //   ),
+              // ),
+              SliverList(
+                delegate: SliverChildListDelegate(items.map((item) {
+                  return ListTile(
+                    leading: CircleAvatar(
+                      radius: 30,
+                      backgroundImage: NetworkImage(item.imageUrl),
                     ),
+                    title: Text(item.displayName),
+                    subtitle: Text('${item.price} ₹'),
+                    trailing: ActionButtons(cart: cart, item: item),
                   );
-                }).toList(),
+                }).toList()),
               ),
-              SizedBox(height: 20),
-              Expanded(
-                child: StreamBuilder(
-                    stream: DBService.db.collection('menu').snapshots(),
-                    builder: (_, snapshot) {
-                      if (!snapshot.hasData)
-                        return Center(child: CircularProgressIndicator());
-                      List<DocumentSnapshot> items = snapshot.data.documents;
-                      return ListView.builder(
-                          itemCount: items.length,
-                          itemBuilder: (_, i) {
-                            var item = items[i].data();
-                            return ListTile(
-                              leading: CircleAvatar(
-                                radius: 30,
-                                backgroundImage:
-                                    NetworkImage(item['image_url']),
-                              ),
-                              title: Text(item['name']),
-                              subtitle: Text('${item['price']} ₹'),
-                              trailing: Icon(Icons.add),
-                              onTap: () {
-                                user.addItem(item['name'], item['price'].toDouble());
-                              },
-                            );
-                          });
-                    }),
-              )
             ],
-          ),
-        ),
+          );
+        },
       ),
+    );
+  }
+}
+
+class ActionButtons extends StatefulWidget {
+  const ActionButtons({
+    Key key,
+    @required this.cart,
+    @required this.item,
+  }) : super(key: key);
+
+  final Cart cart;
+  final MenuItem item;
+
+  @override
+  _ActionButtonsState createState() => _ActionButtonsState();
+}
+
+class _ActionButtonsState extends State<ActionButtons> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 80,
+      height: 25,
+      decoration: BoxDecoration(
+          border: Border.all(width: 1, color: Colors.grey[900]),
+          borderRadius: BorderRadius.circular(5)),
+      child: widget.cart.items.containsKey(widget.item.name)
+          ? Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                GestureDetector(
+                    onTap: () => widget.cart.removeItem(widget.item),
+                    child: Icon(Icons.remove, size: 16, color: primary)),
+                Container(
+                  width: 20,
+                  color: primary,
+                  child: Center(
+                    child: Text(
+                        widget.cart.items[widget.item.name]['quantity'].toString()),
+                  ),
+                ),
+                GestureDetector(
+                    onTap: () => widget.cart.addItem(widget.item),
+                    child: Icon(Icons.add, size: 16, color: primary)),
+              ],
+            )
+          : GestureDetector(
+              onTap: () => widget.cart.addItem(widget.item),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(width: 5),
+                  const Text('Add'),
+                  SizedBox(width: 5),
+                  Icon(Icons.add, size: 16, color: primary),
+                ],
+              ),
+            ),
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:canteen/models/cart.dart';
 import 'package:canteen/services/database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -36,7 +37,7 @@ class UserData {
 }
 
 class CurrentUser extends UserData with ChangeNotifier {
-  Map<String, dynamic> cart;
+  Cart cart;
   static CurrentUser user;
   static CurrentUser initialize(Map<String, dynamic> userDoc) {
     print('setting data...');
@@ -44,13 +45,8 @@ class CurrentUser extends UserData with ChangeNotifier {
     user.name = userDoc['name'];
     user.email = userDoc['email'];
     user.phone = userDoc['phone'];
-    user.cart = userDoc['cart'];
+    user.cart = Cart(user: userDoc['email'], items: userDoc['cart']);
     return user;
-  }
-
-  addItem(String item, double price) {
-    user.cart[item] = {'Price': price, 'Quantity': 1};
-    notifyListeners();
   }
 
   void clear() {

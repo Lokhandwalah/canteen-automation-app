@@ -1,3 +1,4 @@
+import 'package:canteen/models/cart.dart';
 import 'package:canteen/models/user.dart';
 import 'package:canteen/screens/menu/home.dart';
 import 'package:canteen/services/authentication.dart';
@@ -294,9 +295,14 @@ class _SignupFormState extends State<SignupForm> {
       CurrentUser currentUser = result['current'];
       await Future.delayed(Duration(seconds: 2));
       Navigator.of(context, rootNavigator: true).pop();
-      Navigator.of(context).pushReplacement(goTo(
-          ChangeNotifierProvider<CurrentUser>.value(
-              value: currentUser, child: MainScreen())));
+      Navigator.of(context).pushReplacement(
+        goTo(
+          MultiProvider(providers: [
+            ChangeNotifierProvider<CurrentUser>.value(value: currentUser),
+            ChangeNotifierProvider<Cart>.value(value: currentUser.cart),
+          ], child: MainScreen()),
+        ),
+      );
     }
   }
 }

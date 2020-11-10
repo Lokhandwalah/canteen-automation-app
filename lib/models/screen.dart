@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import '../screens/account/account.dart';
-import '../screens/cart/cart.dart';
+import '../screens/cart/cart_screen.dart';
 import '../screens/menu/home.dart';
 
 class Screen {

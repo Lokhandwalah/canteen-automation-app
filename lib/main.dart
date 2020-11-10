@@ -1,3 +1,4 @@
+import 'package:canteen/models/cart.dart';
 import 'package:canteen/models/user.dart';
 import 'package:canteen/screens/account/account.dart';
 import 'package:canteen/services/authentication.dart';
@@ -7,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'screens/cart/cart.dart';
+import 'screens/cart/cart_screen.dart';
 import 'utilities/constants.dart';
 import 'screens/menu/home.dart';
 import 'screens/auth_screen.dart';
@@ -58,8 +59,10 @@ class _SplashScreenState extends State<SplashScreen> {
     }
     Navigator.of(context).pushReplacement(PageTransition(
         child: isLoggedIn
-            ? ChangeNotifierProvider<CurrentUser>.value(
-                value: user, child: MainScreen())
+            ? MultiProvider(providers: [
+                ChangeNotifierProvider<CurrentUser>.value(value: user),
+                ChangeNotifierProvider<Cart>.value(value: user.cart),
+              ], child: MainScreen())
             : AuthScreen(),
         type: rightToLeft,
         duration: Duration(milliseconds: 500)));

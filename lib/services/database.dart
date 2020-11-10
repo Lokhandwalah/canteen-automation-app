@@ -11,10 +11,11 @@ abstract class Database {
 
 class DBService extends Database {
   static final db = FirebaseFirestore.instance;
-  final userCollection = db.collection('users');
+  static final users = db.collection('users');
+  static final menu = db.collection('menu');
   @override
   Future<void> createUser(UserData user) async {
-    await userCollection.doc(user.email).set({
+    await users.doc(user.email).set({
       'name': user.name,
       'email': user.email,
       'uid': user.uid,
@@ -29,13 +30,13 @@ class DBService extends Database {
   @override
   Future<DocumentSnapshot> getUserDoc(String email) async {
     final result =
-        await userCollection.where('email', isEqualTo: email).limit(1).get();
+        await users.where('email', isEqualTo: email).limit(1).get();
     return result.docs.length != 0 ? result.docs[0] : null;
   }
 
   Future<DocumentSnapshot> getUserDocUsingEmail(String email) async {
     final result =
-        await userCollection.doc(email).get();
+        await users.doc(email).get();
     return result;
   }
 

@@ -1,3 +1,4 @@
+import 'package:canteen/models/cart.dart';
 import 'package:canteen/models/user.dart';
 import 'package:canteen/screens/user_auth/forgot_password.dart';
 import 'package:canteen/screens/menu/home.dart';
@@ -133,7 +134,8 @@ class _LoginFormState extends State<LoginForm> {
                                   if (_formKey.currentState.validate())
                                     _handleLogin();
                                   else
-                                    setState(() => _autovalidate = AutovalidateMode.onUserInteraction);
+                                    setState(() => _autovalidate =
+                                        AutovalidateMode.onUserInteraction);
                                 }),
                             MyButton(
                                 title: 'Login with Google',
@@ -208,9 +210,14 @@ class _LoginFormState extends State<LoginForm> {
       await Future.delayed(Duration(seconds: 2));
       currentUser = result['current'];
       Navigator.of(context, rootNavigator: true).pop();
-      Navigator.of(context).pushReplacement(goTo(
-          ChangeNotifierProvider<CurrentUser>.value(
-              value: currentUser, child: MainScreen())));
+      Navigator.of(context).pushReplacement(
+        goTo(
+          MultiProvider(providers: [
+            ChangeNotifierProvider<CurrentUser>.value(value: currentUser),
+            ChangeNotifierProvider<Cart>.value(value: currentUser.cart),
+          ], child: MainScreen()),
+        ),
+      );
     }
   }
 }
