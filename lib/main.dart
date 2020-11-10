@@ -27,8 +27,8 @@ class MyApp extends StatelessWidget {
           scaffoldBackgroundColor: bg,
           primaryColor: primary,
           accentColor: primary,
-          cursorColor: primary,
           primarySwatch: Colors.orange,
+          textSelectionTheme: TextSelectionThemeData(cursorColor: primary),
           visualDensity: VisualDensity.adaptivePlatformDensity),
       home: SplashScreen(),
       routes: {

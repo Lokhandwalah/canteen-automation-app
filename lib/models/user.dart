@@ -48,9 +48,8 @@ class CurrentUser extends UserData with ChangeNotifier {
     return user;
   }
 
-  addItem(String item, price) {
-
-    user.cart[item] = {'Price': double.parse(price), 'Quantity': 1};
+  addItem(String item, double price) {
+    user.cart[item] = {'Price': price, 'Quantity': 1};
     notifyListeners();
   }
 

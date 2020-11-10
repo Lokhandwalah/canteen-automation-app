@@ -53,7 +53,7 @@ class _MainScreenState extends State<MainScreen> {
                   (p) => BottomNavigationBarItem(
                       icon: Icon(p.icon),
                       activeIcon: Icon(p.activeIcon),
-                      title: Text(p.title)),
+                      label: p.title),
                 )
                 .toList()),
         body: IndexedStack(
@@ -138,15 +138,16 @@ class _HomeScreenState extends State<HomeScreen> {
                           itemBuilder: (_, i) {
                             var item = items[i].data();
                             return ListTile(
-                              leading: Icon(
-                                Icons.fastfood,
-                                color: primary,
+                              leading: CircleAvatar(
+                                radius: 30,
+                                backgroundImage:
+                                    NetworkImage(item['image_url']),
                               ),
                               title: Text(item['name']),
-                              subtitle: Text(item['category']),
+                              subtitle: Text('${item['price']} ₹'),
                               trailing: Icon(Icons.add),
                               onTap: () {
-                                user.addItem(item['name'], item['price']);
+                                user.addItem(item['name'], item['price'].toDouble());
                               },
                             );
                           });

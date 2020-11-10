@@ -1,7 +1,5 @@
 import 'package:canteen/models/user.dart';
 import 'package:canteen/utilities/constants.dart';
-import 'package:provider/provider.dart';
-
 import '../../widgets/dialog_box.dart';
 import '../../services/authentication.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +25,7 @@ class _MyAccountState extends State<MyAccount> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            SizedBox(height: 50),
+            SizedBox(height: 10),
             ListTile(
               title: Text(
                 user.name,

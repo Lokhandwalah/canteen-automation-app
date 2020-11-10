@@ -22,7 +22,8 @@ class LoginForm extends StatefulWidget {
 
 class _LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
-  bool _autoValidate = false, _loading = false, _showPassword = false;
+  bool _loading = false, _showPassword = false;
+  AutovalidateMode _autovalidate = AutovalidateMode.disabled;
   TextEditingController _emailController, _passwordController;
   // String _email, _password;
 
@@ -52,7 +53,7 @@ class _LoginFormState extends State<LoginForm> {
           child: SingleChildScrollView(
             child: Form(
               key: _formKey,
-              autovalidate: _autoValidate,
+              autovalidateMode: _autovalidate,
               child: Column(
                 children: [
                   Text(
@@ -78,7 +79,7 @@ class _LoginFormState extends State<LoginForm> {
                     child: TextFormField(
                       controller: _passwordController,
                       keyboardType: TextInputType.text,
-                      obscureText: _showPassword,
+                      obscureText: !_showPassword,
                       decoration: roundedTFDecoration(
                           hintText: 'Password',
                           prefixIcon: Icons.lock_outline,
@@ -132,7 +133,7 @@ class _LoginFormState extends State<LoginForm> {
                                   if (_formKey.currentState.validate())
                                     _handleLogin();
                                   else
-                                    setState(() => _autoValidate = true);
+                                    setState(() => _autovalidate = AutovalidateMode.onUserInteraction);
                                 }),
                             MyButton(
                                 title: 'Login with Google',

@@ -15,11 +15,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "578576433150-7fi3t5davkmnr1tha5lqsbuvvro6uv8n.apps.googleusercontent.com",
+          "client_id": "578576433150-ulblrik4of8rc78g0u6c0req60hehrun.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.kjsieit.canteen",
-            "certificate_hash": "973589a7fbe0a51e10cf369804bbd251b36eaef5"
+            "certificate_hash": "fb06a08b63812029fbb702dbbcafc73433a6d03f"
           }
         },
         {
