@@ -1,7 +1,10 @@
+import 'package:animate_icons/animate_icons.dart';
 import 'package:canteen/models/cart.dart';
 import 'package:canteen/models/category.dart';
 import 'package:canteen/models/menu_items.dart';
+import 'package:canteen/screens/menu/search.dart';
 import 'package:canteen/widgets/badge.dart';
+import 'package:firebase_image/firebase_image.dart';
 import 'package:flutter/material.dart';
 import 'package:canteen/models/user.dart';
 import 'package:canteen/services/database.dart';
@@ -82,100 +85,172 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
-    List<String> imageList = [
-      'https://www.thespruceeats.com/thmb/XDmwhz9HXEMxhus08YhlIvTuAZI=/3865x2174/smart/filters:no_upscale()/paneer-makhani-or-shahi-paneer-indian-food-670906899-5878ef725f9b584db3d890f4.jpg',
-      'https://media.cntraveller.in/wp-content/uploads/2020/05/dosa-recipes-866x487.jpg',
-      'https://www.loveandoliveoil.com/wp-content/uploads/2015/03/soy-sauce-noodlesH2.jpg',
-      'https://cdn.cdnparenting.com/articles/2020/02/26144447/PULAV.jpg'
-    ];
     final user = Provider.of<CurrentUser>(context);
     final cart = Provider.of<Cart>(context);
     final menu = Provider.of<Menu>(context);
     List<MenuItem> items = menu.menuItems.values.toList();
     return Scaffold(
-        appBar: AppBar(
-          title: ListTile(
-            title:
-                Text('Welcome, ${user.name}', style: TextStyle(fontSize: 20)),
-          ),
-          actions: [
-            IconButton(icon: Icon(Icons.notifications), onPressed: () {})
-          ],
-        ),
+        appBar: _buildAppBar(user),
         body: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  ImageSlider(imageList),
-                  Center(
-                    child: const Text(
-                      'What would you like you order today ?',
-                      style: TextStyle(fontSize: 20, color: black),
+              child: Container(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    ImageSlider(imageList()),
+                    FittedBox(
+                      child: const Text(
+                        'What would you like you order today ?',
+                        style: TextStyle(fontSize: 18, color: black),
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 5),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: Category.categories.map((category) {
-                      return Padding(
-                        padding: const EdgeInsets.all(4),
-                        child: Container(
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              color: secondary),
-                          child: Column(
-                            children: [
-                              Container(
-                                height: 80,
-                                width: MediaQuery.of(context).size.width * 0.2,
-                                decoration: BoxDecoration(
-                                  color: primary,
-                                  image: DecorationImage(
-                                      image: NetworkImage(category.imageUrl),
-                                      fit: BoxFit.cover),
-                                  borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(8),
-                                      topRight: Radius.circular(8)),
-                                ),
-                              ),
-                              Center(
-                                  child: Text(
-                                capitalize(category.name),
-                                style: TextStyle(color: black),
-                              )),
-                            ],
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ],
+                    SizedBox(height: 5),
+                  ],
+                ),
               ),
             ),
-            // SliverAppBar(
-            //   pinned: true,
-            //   backgroundColor: bg,
-            //   title: TextFormField(
-            //     decoration: InputDecoration(
-            //         hintText: 'Search Menu',
-            //         prefixIcon: Icon(Icons.search),
-            //         focusedBorder: OutlineInputBorder(
-            //             borderSide: BorderSide(
-            //           style: BorderStyle.solid,
-            //           width: 1,
-            //           color: primary
-            //         ))),
-            //   ),
-            // ),
+            _buildCategories(context),
+            SliverToBoxAdapter(child: SizedBox(height: 5)),
+            SliverAppBar(
+              floating: true,
+              backgroundColor: bg,
+              collapsedHeight: 60,
+              centerTitle: true,
+              title: _buildSearchField(context),
+            ),
             SliverList(
-              delegate: SliverChildListDelegate(items.map((item) {
-                return MenuItemListTile(cart: cart, item: item);
-              }).toList()),
+              delegate:
+                  SliverChildListDelegate(_buildCategoryItems(cart, items)),
             ),
           ],
         ));
+  }
+
+  Widget _buildSearchField(BuildContext context) {
+    return GestureDetector(
+      onTap: () => showDialog(
+          context: context,
+          builder: (_) => SearchPage(
+                parentContext: context,
+              )),
+      child: Container(
+        height: kToolbarHeight - 7,
+        width: double.infinity,
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(25),
+            color: bg,
+            border: Border.all(color: primary, width: 1.5),
+            boxShadow: [
+              BoxShadow(offset: Offset(5, 2), color: Colors.grey, blurRadius: 5)
+            ]),
+        child: Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Icon(Icons.search, color: primary),
+            ),
+            Text(
+              'Search Menu',
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyText2
+                  .copyWith(fontSize: 15, color: Colors.grey[700]),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategories(BuildContext context) {
+    return SliverGrid(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 4, crossAxisSpacing: 0, mainAxisSpacing: 5),
+      delegate: SliverChildBuilderDelegate((_, index) {
+        final category = Category.categories[index];
+        return Container(
+          height: 80,
+          width: MediaQuery.of(context).size.width * 0.2,
+          margin: const EdgeInsets.symmetric(horizontal: 5),
+          decoration: BoxDecoration(
+            color: primary,
+            image: DecorationImage(
+                image: FirebaseImage(category.imageUrl),
+                fit: BoxFit.cover,
+                colorFilter:
+                    ColorFilter.mode(Colors.black38, BlendMode.darken)),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Center(
+            child: Text(
+              capitalize(category.name),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        );
+      }, childCount: Category.categories.length),
+    );
+  }
+
+  AppBar _buildAppBar(CurrentUser user) {
+    return AppBar(
+      title: ListTile(
+        title: Text('Welcome, ${user.name}', style: TextStyle(fontSize: 20)),
+      ),
+      actions: [IconButton(icon: Icon(Icons.notifications), onPressed: () {})],
+    );
+  }
+
+  _buildCategoryItems(Cart cart, List<MenuItem> items) {
+    return Category.categories.map((category) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.fromLTRB(10, 20, 0, 8.0),
+            child: Text(
+              capitalize(category.name),
+              style: TextStyle(
+                  color: primary, fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          Divider(
+            color: primary,
+          ),
+          ...items
+              .where((item) =>
+                  item.category.toLowerCase() == category.name.toLowerCase())
+              .map(
+                (item) => MenuItemListTile(cart: cart, item: item),
+              ),
+        ],
+      );
+    }).toList();
+  }
+
+  _buildSearchItems(Cart cart, List<MenuItem> items, String query) {
+    items = items
+        .where(
+            (item) => item.name.toLowerCase().startsWith(query.toLowerCase()))
+        .toList();
+    return [
+      if (items.length == 0)
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 28.0),
+            child: Text('No Items Found'),
+          ),
+        )
+      else
+        ...items.map(
+          (item) => MenuItemListTile(cart: cart, item: item),
+        ),
+      Expanded(child: Container()),
+    ];
   }
 }
 
@@ -193,7 +268,7 @@ class MenuItemListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Card(
         color: bg,
@@ -205,12 +280,9 @@ class MenuItemListTile extends StatelessWidget {
               BoxShadow(
                   color: Colors.grey[900], offset: Offset(4, 3), blurRadius: 5)
             ]),
-            child: CircleAvatar(
-              radius: 30,
-              backgroundImage: NetworkImage(item.imageUrl),
-            ),
+            child: _builditemImage(item.imageUrl),
           ),
-          title: Text(item.displayName),
+          title: Text(item.displayName()),
           subtitle: Text('₹${item.price}'),
           trailing: Column(
             mainAxisSize: MainAxisSize.min,
@@ -219,11 +291,22 @@ class MenuItemListTile extends StatelessWidget {
               ActionButtons(cart: cart, item: item),
               SizedBox(height: 5),
               if (insideCart)
-                Text('₹${cart.items[item.name]['quantity'] * item.price}'),
+                Text(
+                    '₹${cart.items[item.name.toLowerCase()]['quantity'] * item.price}'),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  CircleAvatar _builditemImage(String url) {
+    return CircleAvatar(
+      radius: 30,
+      backgroundImage:
+          url != null && url.isNotEmpty ? FirebaseImage(url) : null,
+      child:
+          url != null && url.isNotEmpty ? null : Icon(Icons.fastfood_outlined),
     );
   }
 }

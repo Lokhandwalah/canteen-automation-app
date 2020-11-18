@@ -37,10 +37,15 @@ dependencies:
   firebase_core: ^0.5.2
   cloud_firestore: ^0.14.3
   firebase_auth: ^0.18.3
+  firebase_image: ^0.3.0
   google_sign_in: ^4.5.6
   provider: ^4.3.2
   steel_crypt: ^1.7.1+1
+  animate_icons: ^0.0.4
   carousel_slider: ^2.3.1
+  scroll_to_index: ^1.0.6
+  scrollable_positioned_list: ^0.1.8
+  razorpay_flutter: ^1.2.2
 
 dev_dependencies:
   flutter_test:

@@ -1,3 +1,5 @@
+import 'package:canteen/models/cart.dart';
+import 'package:flutter/foundation.dart';
 import 'package:steel_crypt/steel_crypt.dart';
 
 import '../models/user.dart';
@@ -13,6 +15,8 @@ class DBService extends Database {
   static final db = FirebaseFirestore.instance;
   static final users = db.collection('users');
   static final menu = db.collection('menu');
+  static final orders = db.collection('orders');
+  static final activeOrders = db.collection('active_orders');
   @override
   Future<void> createUser(UserData user) async {
     await users.doc(user.email).set({
@@ -49,6 +53,26 @@ class DBService extends Database {
   Future<void> updateCart(String userEmail, Map<String, dynamic> items) async {
     await db.runTransaction((transaction) async =>
         transaction.update(users.doc(userEmail), {'cart': items}));
+  }
+
+  Future<void> placeOrder(
+      {@required String userEmail,
+      @required String username,
+      @required Map<String, dynamic> items,
+      @required double amount,
+      @required PaymentType paymentType}) async {
+    await db.runTransaction((transaction) async {
+      transaction.set(activeOrders.doc(), {
+        'bill': items,
+        'total_amount': amount,
+        'ordered_by': userEmail,
+        'username': username,
+        'status': 'placed',
+        'payment_type': paymentType == PaymentType.cash ? 'cash' : 'digital',
+        'payment_status': paymentType == PaymentType.cash ? 'pending' : 'paid',
+        'placed_at': DateTime.now()
+      });
+    });
   }
 }
 

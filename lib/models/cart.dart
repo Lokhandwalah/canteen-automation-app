@@ -12,13 +12,14 @@ class Cart with ChangeNotifier {
   Cart({this.user, this.items, this.prefs});
 
   void addItem(MenuItem newItem) {
-    if (items.containsKey(newItem.name)) {
-      items.update(newItem.name,
+    final itemName = newItem.name.toLowerCase();
+    if (items.containsKey(itemName)) {
+      items.update(itemName,
           (oldItem) => {'id': newItem.id, 'quantity': oldItem['quantity'] + 1});
     } else
-      items.putIfAbsent(newItem.name, () => {'id': newItem.id, 'quantity': 1});
+      items.putIfAbsent(itemName, () => {'id': newItem.id, 'quantity': 1});
     prefs.setStringList('items', items.keys.toList());
-    prefs.setInt(newItem.name, items[newItem.name]['quantity']);
+    prefs.setInt(itemName, items[newItem.name]['quantity']);
     DBService().updateCart(user, items);
     notifyListeners();
   }
@@ -45,3 +46,4 @@ class Cart with ChangeNotifier {
   List<String> get itemList => items.keys.toList();
 }
 
+enum PaymentType { digital, cash }

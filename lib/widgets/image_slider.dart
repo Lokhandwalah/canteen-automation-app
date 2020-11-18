@@ -48,22 +48,19 @@ class _ImageSliderState extends State<ImageSlider> {
           }).toList(),
         ),
       ),
-      Padding(
-        padding: const EdgeInsets.only(bottom: 10.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List<Widget>.generate(widget.imgList.length, (index) {
-            return Container(
-              width: 10.0,
-              height: 10.0,
-              margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: _current == index ? primary : black,
-              ),
-            );
-          }),
-        ),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List<Widget>.generate(widget.imgList.length, (index) {
+          return Container(
+            width: 10.0,
+            height: 10.0,
+            margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: _current == index ? primary : black,
+            ),
+          );
+        }),
       ),
     ]);
   }

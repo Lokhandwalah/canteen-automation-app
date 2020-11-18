@@ -10,20 +10,19 @@ class MenuItem {
   int id;
   double price;
   bool isAvailable;
-
   MenuItem(this.itemDoc) {
     Map<String, dynamic> item = itemDoc.data();
-    this.name = item['name'];
+    this.name = item['name'].toString().toLowerCase();
     this.id = item['id'];
-    this.price = item['price'].toDouble();
-    this.name = item['name'];
+    this.price = double.parse(item['price'].toString());
     this.category = item['category'];
     this.imageUrl = item['image_url'];
     this.isAvailable = item['isAvailable'];
   }
 
-  String get displayName =>
-      name.substring(0, 1).toUpperCase() + name.substring(1);
+  String displayName() {
+    return this.name.substring(0, 1).toUpperCase() + name.substring(1);
+  }
 }
 
 class Menu with ChangeNotifier {
@@ -37,7 +36,7 @@ class Menu with ChangeNotifier {
     print('adding items...');
     snapshot.docs.forEach(
       (doc) => menuItems.update(
-        doc.data()['name'],
+        doc.data()['name'].toString().toLowerCase(),
         (_) => MenuItem(doc),
         ifAbsent: () => MenuItem(doc),
       ),
