@@ -1,4 +1,3 @@
-import 'package:canteen/utilities/constants.dart';
 import 'package:flutter/material.dart';
 
 class Badge extends StatelessWidget {

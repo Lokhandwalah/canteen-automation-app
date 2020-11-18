@@ -1,7 +1,6 @@
 import 'package:canteen/models/cart.dart';
 import 'package:canteen/models/user.dart';
 import 'package:canteen/screens/user_auth/forgot_password.dart';
-import 'package:canteen/screens/menu/home.dart';
 import 'package:canteen/services/authentication.dart';
 import 'package:canteen/utilities/constants.dart';
 import 'package:canteen/utilities/validation.dart';
@@ -13,6 +12,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:provider/provider.dart';
+
+import '../main_screen.dart';
 
 class LoginForm extends StatefulWidget {
   final GlobalKey<FlipCardState> flipkey;

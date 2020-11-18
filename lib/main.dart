@@ -2,6 +2,7 @@ import 'package:canteen/models/cart.dart';
 import 'package:canteen/models/category.dart';
 import 'package:canteen/models/user.dart';
 import 'package:canteen/screens/account/account.dart';
+import 'package:canteen/screens/main_screen.dart';
 import 'package:canteen/services/authentication.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
@@ -12,7 +13,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'models/menu_items.dart';
 import 'screens/cart/cart_screen.dart';
 import 'utilities/constants.dart';
-import 'screens/menu/home.dart';
 import 'screens/auth_screen.dart';
 
 void main() {
