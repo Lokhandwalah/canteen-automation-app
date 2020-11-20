@@ -1,4 +1,5 @@
 import 'package:canteen/models/cart.dart';
+import 'package:canteen/models/menu_items.dart';
 import 'package:canteen/models/user.dart';
 import 'package:canteen/services/authentication.dart';
 import 'package:canteen/services/database.dart';
@@ -298,6 +299,7 @@ class _SignupFormState extends State<SignupForm> {
           MultiProvider(providers: [
             ChangeNotifierProvider<CurrentUser>.value(value: currentUser),
             ChangeNotifierProvider<Cart>.value(value: currentUser.cart),
+                ChangeNotifierProvider<Menu>.value(value: Menu.menu),
           ], child: MainScreen()),
         ),
       );

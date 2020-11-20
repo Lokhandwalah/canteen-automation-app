@@ -29,14 +29,14 @@ class _HomeScreenState extends State<HomeScreen> {
         body: CustomScrollView(
           slivers: [
             _buildSlider(),
-            _buildCategories(context, cart, items),
+            _buildCategories(context, cart, menu),
             SliverToBoxAdapter(child: SizedBox(height: 5)),
             SliverAppBar(
               floating: true,
               backgroundColor: bg,
               collapsedHeight: 60,
               centerTitle: true,
-              title: _buildSearchField(context),
+              title: _buildSearchField(context, cart, menu),
             ),
             SliverList(
               delegate:
@@ -67,44 +67,58 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildSearchField(BuildContext context) {
+  Widget _buildSearchField(BuildContext context, Cart cart, Menu menu) {
     return GestureDetector(
-      onTap: () => showDialog(
-          context: context,
-          builder: (_) => SearchPage(
-                parentContext: context,
-              )),
-      child: Container(
-        height: kToolbarHeight - 7,
-        width: double.infinity,
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(25),
-            color: bg,
-            border: Border.all(color: primary, width: 1.5),
-            boxShadow: [
-              BoxShadow(offset: Offset(5, 2), color: Colors.grey, blurRadius: 5)
-            ]),
-        child: Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Icon(Icons.search, color: primary),
-            ),
-            Text(
-              'Search Menu',
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyText2
-                  .copyWith(fontSize: 15, color: Colors.grey[700]),
-            ),
-          ],
+      onTap: () => Navigator.of(context).push(
+        PageRouteBuilder(
+          fullscreenDialog: true,
+          transitionDuration: Duration(milliseconds: 500),
+          pageBuilder: (_, __, ___) => MultiProvider(providers: [
+            ChangeNotifierProvider<Cart>.value(value: cart),
+            ChangeNotifierProvider<Menu>.value(value: menu),
+          ], child: SearchPage()),
+          transitionsBuilder:
+              (_, animation, secondaryAnimation, Widget child) =>
+                  FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+        ),
+      ),
+      child: Hero(
+        tag: 'searchbar',
+        child: Container(
+          height: kToolbarHeight - 7,
+          width: double.infinity,
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(25),
+              color: bg,
+              border: Border.all(color: primary, width: 1.5),
+              boxShadow: [
+                BoxShadow(
+                    offset: Offset(5, 2), color: Colors.grey, blurRadius: 5)
+              ]),
+          child: Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Icon(Icons.search, color: primary),
+              ),
+              Text(
+                'Search Menu',
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyText2
+                    .copyWith(fontSize: 15, color: Colors.grey[700]),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildCategories(
-      BuildContext context, Cart cart, List<MenuItem> items) {
+  Widget _buildCategories(BuildContext context, Cart cart, Menu menu) {
     return SliverGrid(
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 4, crossAxisSpacing: 0, mainAxisSpacing: 5),
@@ -115,8 +129,10 @@ class _HomeScreenState extends State<HomeScreen> {
             PageRouteBuilder(
               fullscreenDialog: true,
               transitionDuration: Duration(milliseconds: 500),
-              pageBuilder: (_, __, ___) => ChangeNotifierProvider<Cart>.value(
-                  value: cart, child: CategoryItems(category, items: items)),
+              pageBuilder: (_, __, ___) => MultiProvider(providers: [
+                ChangeNotifierProvider<Cart>.value(value: cart),
+                ChangeNotifierProvider<Menu>.value(value: menu),
+              ], child: CategoryItems(category)),
               transitionsBuilder:
                   (_, animation, secondaryAnimation, Widget child) =>
                       FadeTransition(
@@ -164,7 +180,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  _buildCategoryItems(Cart cart, List<MenuItem> items) {
+  List<Widget> _buildCategoryItems(Cart cart, List<MenuItem> items) {
     return Category.categories.map((category) {
       return Column(
         mainAxisSize: MainAxisSize.min,

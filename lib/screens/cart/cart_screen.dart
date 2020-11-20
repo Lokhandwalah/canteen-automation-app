@@ -8,6 +8,7 @@ import 'package:canteen/widgets/custom_button.dart';
 import 'package:canteen/widgets/itemListTile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:provider/provider.dart';
 import 'package:toast/toast.dart';
 
@@ -50,12 +51,31 @@ class _MyCartState extends State<MyCart> {
             (itemName) {
               MenuItem item = menu.menuItems[itemName];
               total += (item.price * items[itemName]['quantity']).toDouble();
-              items[itemName]['price'] = item.price;
+              items[itemName]['price'] = item.price.round();
               items[itemName].remove('id');
-              return MenuItemListTile(
-                item: item,
-                cart: cart,
-                insideCart: true,
+              print(items);
+              return Slidable(
+                key: ValueKey(itemName),
+                actionPane: SlidableDrawerActionPane(),
+                secondaryActions: <Widget>[
+                  IconSlideAction(
+                    caption: 'Remove',
+                    icon: Icons.delete,
+                    color: Colors.red,
+                    onTap: () => cart.removeItem(item, delete: true),
+                    closeOnTap: true,
+                  )
+                ],
+                dismissal: SlidableDismissal(
+                  child: SlidableDrawerDismissal(),
+                  onDismissed: (actionType) =>
+                      cart.removeItem(item, delete: true),
+                ),
+                child: MenuItemListTile(
+                  item: item,
+                  cart: cart,
+                  insideCart: true,
+                ),
               );
             },
           ),

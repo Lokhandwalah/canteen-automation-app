@@ -3,6 +3,8 @@ import 'package:canteen/models/category.dart';
 import 'package:canteen/models/user.dart';
 import 'package:canteen/screens/account/account.dart';
 import 'package:canteen/screens/main_screen.dart';
+import 'package:canteen/screens/menu/category_screen.dart';
+import 'package:canteen/screens/menu/search.dart';
 import 'package:canteen/services/authentication.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
@@ -38,6 +40,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => MainScreen(),
         '/auth': (context) => AuthScreen(),
         '/cart': (context) => MyCart(),
+        '/search': (context) => SearchPage(),
         '/account': (context) => MyAccount()
       },
     );
@@ -55,23 +58,23 @@ class _SplashScreenState extends State<SplashScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool isLoggedIn = AuthService().isUserLoggedIn();
     CurrentUser user;
-    Menu menu = Menu();
     if (isLoggedIn) {
       print('user is already logged in');
       user = await UserData.setData(prefs.getString('email'));
     }
-    await menu.initialize();
+    await Menu().initialize();
     await Category.initialize();
-    Navigator.of(context).pushReplacement(PageTransition(
-        child: isLoggedIn
+    Navigator.of(context).pushReplacement(
+      goTo(
+        isLoggedIn
             ? MultiProvider(providers: [
                 ChangeNotifierProvider<CurrentUser>.value(value: user),
                 ChangeNotifierProvider<Cart>.value(value: user.cart),
-                ChangeNotifierProvider<Menu>.value(value: menu),
+                ChangeNotifierProvider<Menu>.value(value: Menu.menu),
               ], child: MainScreen())
             : AuthScreen(),
-        type: rightToLeft,
-        duration: Duration(milliseconds: 500)));
+      ),
+    );
   }
 
   @override

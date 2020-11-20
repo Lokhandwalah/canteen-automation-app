@@ -1,4 +1,5 @@
 import 'package:canteen/models/cart.dart';
+import 'package:canteen/models/menu_items.dart';
 import 'package:canteen/models/user.dart';
 import 'package:canteen/screens/user_auth/forgot_password.dart';
 import 'package:canteen/services/authentication.dart';
@@ -45,7 +46,6 @@ class _LoginFormState extends State<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
-    // _loading = false;
     return SafeArea(
       child: AbsorbPointer(
         absorbing: _loading,
@@ -97,7 +97,6 @@ class _LoginFormState extends State<LoginForm> {
                           return 'Minimum 6 characters';
                         return null;
                       },
-                      // onChanged: (value) => _password = value.trim(),
                     ),
                   ),
                   _loading
@@ -216,6 +215,7 @@ class _LoginFormState extends State<LoginForm> {
           MultiProvider(providers: [
             ChangeNotifierProvider<CurrentUser>.value(value: currentUser),
             ChangeNotifierProvider<Cart>.value(value: currentUser.cart),
+                ChangeNotifierProvider<Menu>.value(value: Menu.menu),
           ], child: MainScreen()),
         ),
       );

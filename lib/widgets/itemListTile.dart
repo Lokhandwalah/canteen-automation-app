@@ -1,4 +1,3 @@
-
 import 'package:canteen/models/cart.dart';
 import 'package:canteen/models/menu_items.dart';
 import 'package:canteen/utilities/constants.dart';
@@ -79,9 +78,7 @@ class _MenuItemListTileState extends State<MenuItemListTile> {
                 children: [
                   ActionButtons(cart: widget.cart, item: widget.item),
                   SizedBox(height: 5),
-                  if (widget.insideCart)
-                    Text(
-                        '₹${widget.cart.items[widget.item.name.toLowerCase()]['quantity'] * widget.item.price}'),
+                  if (widget.insideCart) _buildPrice(),
                 ],
               ),
             ),
@@ -89,6 +86,12 @@ class _MenuItemListTileState extends State<MenuItemListTile> {
         ),
       ),
     );
+  }
+
+  Text _buildPrice() {
+    final quantity = widget.cart.items[widget.item.name]['quantity'];
+    final price = widget.item.price;
+    return Text('₹${quantity * price}');
   }
 }
 
@@ -117,30 +120,26 @@ class _ActionButtonsState extends State<ActionButtons> {
           borderRadius: BorderRadius.circular(5)),
       child: widget.cart.items.containsKey(widget.item.name)
           ? Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
                   child: GestureDetector(
                       onTap: () => widget.cart.removeItem(widget.item),
-                      child: Padding(
-                        padding: const EdgeInsets.all(5.0),
-                        child: Icon(Icons.remove, size: 16, color: primary),
-                      )),
+                      child: Icon(quantity == 1 ? Icons.delete : Icons.remove,
+                          size: 20, color: primary)),
                 ),
                 Container(
                   width: 20,
                   color: primary,
                   child: Center(
-                    child: Text(widget.cart.items[widget.item.name]['quantity']
-                        .toString()),
+                    child: Text(quantity.toString()),
                   ),
                 ),
                 Expanded(
                   child: GestureDetector(
                       onTap: () => widget.cart.addItem(widget.item),
-                      child: Padding(
-                        padding: const EdgeInsets.all(5.0),
-                        child: Icon(Icons.add, size: 16, color: primary),
-                      )),
+                      child: Icon(Icons.add, size: 20, color: primary)),
                 ),
               ],
             )
@@ -158,4 +157,6 @@ class _ActionButtonsState extends State<ActionButtons> {
             ),
     );
   }
+
+  int get quantity => widget.cart.items[widget.item.name]['quantity'];
 }

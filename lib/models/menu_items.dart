@@ -27,6 +27,7 @@ class MenuItem {
 
 class Menu with ChangeNotifier {
   Map<String, MenuItem> menuItems = {};
+  static Menu menu = Menu();
   Future<void> initialize({List<MenuItem> itemList}) async {
     await DBService.menu.get().then(onData);
     DBService.menu.snapshots().listen(onData);
@@ -35,7 +36,7 @@ class Menu with ChangeNotifier {
   onData(QuerySnapshot snapshot) {
     print('adding items...');
     snapshot.docs.forEach(
-      (doc) => menuItems.update(
+      (doc) => menu.menuItems.update(
         doc.data()['name'].toString().toLowerCase(),
         (_) => MenuItem(doc),
         ifAbsent: () => MenuItem(doc),
@@ -44,5 +45,5 @@ class Menu with ChangeNotifier {
     notifyListeners();
   }
 
-  List<MenuItem> get itemList => menuItems.values.toList();
+  List<MenuItem> get itemList => menu.menuItems.values.toList();
 }

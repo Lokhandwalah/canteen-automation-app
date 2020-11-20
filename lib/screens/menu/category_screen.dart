@@ -9,18 +9,26 @@ import 'package:provider/provider.dart';
 
 class CategoryItems extends StatefulWidget {
   final Category category;
-  final Cart cart;
-  final List<MenuItem> items;
-  const CategoryItems(this.category, {this.cart, this.items});
+  CategoryItems(this.category);
   @override
   _CategoryItemsState createState() => _CategoryItemsState();
 }
 
 class _CategoryItemsState extends State<CategoryItems> {
   Cart cart;
+  List<MenuItem> items;
+  Category category;
+
+  @override
+  void initState() {
+    super.initState();
+    category = widget.category;
+  }
+
   @override
   Widget build(BuildContext context) {
     cart = Provider.of<Cart>(context);
+    items = Provider.of<Menu>(context).itemList;
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -30,13 +38,13 @@ class _CategoryItemsState extends State<CategoryItems> {
             iconTheme: IconThemeData(color: primary),
             flexibleSpace: FlexibleSpaceBar(
               background: Hero(
-                tag: widget.category.name + 'container',
+                tag: category.name + 'container',
                 child: Container(
                   height: MediaQuery.of(context).size.height * 0.3,
                   decoration: BoxDecoration(
                     color: primary,
                     image: DecorationImage(
-                        image: FirebaseImage(widget.category.imageUrl),
+                        image: FirebaseImage(category.imageUrl),
                         fit: BoxFit.cover,
                         colorFilter:
                             ColorFilter.mode(Colors.black38, BlendMode.darken)),
@@ -44,27 +52,29 @@ class _CategoryItemsState extends State<CategoryItems> {
                 ),
               ),
               title: Text(
-                capitalize(widget.category.name),
-                textAlign: TextAlign.center, 
+                capitalize(category.name),
+                textAlign: TextAlign.center,
                 style: TextStyle(color: primary, fontSize: 25),
               ),
             ),
             pinned: true,
           ),
-          _buildItemsList(),
+          _buildItemsList(category),
         ],
       ),
     );
   }
 
-  Widget _buildItemsList() {
-    final items = widget.items
+  Widget _buildItemsList(Category category) {
+    final filteredItems = items
         .where((item) =>
-            item.category.toLowerCase() == widget.category.name.toLowerCase())
+            item.category.toLowerCase() == category.name.toLowerCase())
         .toList();
     return SliverList(
       delegate: SliverChildListDelegate(
-        items.map((item) => MenuItemListTile(cart: cart, item: item)).toList(),
+        filteredItems
+            .map((item) => MenuItemListTile(cart: cart, item: item))
+            .toList(),
       ),
     );
   }
