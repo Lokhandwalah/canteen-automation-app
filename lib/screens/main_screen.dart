@@ -1,5 +1,6 @@
 import 'package:canteen/models/cart.dart';
 import 'package:canteen/models/screen.dart';
+import 'package:canteen/services/messaging.dart';
 import 'package:canteen/utilities/constants.dart';
 import 'package:canteen/widgets/badge.dart';
 import 'package:flutter/material.dart';
@@ -15,21 +16,21 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
   DateTime currentBackPressTime;
-  Future<bool> _onWillPop(BuildContext ctx) async {
-    if (_currentIndex == 0) {
-      DateTime now = DateTime.now();
-      if (currentBackPressTime == null ||
-          now.difference(currentBackPressTime) > Duration(seconds: 1)) {
-        currentBackPressTime = now;
-        Toast.show("Press back again to exit", ctx);
-        return Future.value(false);
-      }
-      SystemNavigator.pop();
-      return Future.value(true);
-    } else {
-      setState(() => _currentIndex = 0);
-      return Future.value(false);
-    }
+
+  @override
+  void initState() {
+    super.initState();
+    MessagingService.fbm.configure(
+      onMessage: (message) async {
+        print('onMessage: ' + message.toString());
+      },
+      onResume: (message) async {
+        print('onResume: ' + message.toString());
+      },
+      onLaunch: (message) async {
+        print('onLaunch: ' + message.toString());
+      },
+    );
   }
 
   @override
@@ -64,5 +65,22 @@ class _MainScreenState extends State<MainScreen> {
         ),
       ),
     );
+  }
+
+  Future<bool> _onWillPop(BuildContext ctx) async {
+    if (_currentIndex == 0) {
+      DateTime now = DateTime.now();
+      if (currentBackPressTime == null ||
+          now.difference(currentBackPressTime) > Duration(seconds: 1)) {
+        currentBackPressTime = now;
+        Toast.show("Press back again to exit", ctx);
+        return Future.value(false);
+      }
+      SystemNavigator.pop();
+      return Future.value(true);
+    } else {
+      setState(() => _currentIndex = 0);
+      return Future.value(false);
+    }
   }
 }

@@ -6,7 +6,9 @@ import 'package:canteen/screens/main_screen.dart';
 import 'package:canteen/screens/menu/category_screen.dart';
 import 'package:canteen/screens/menu/search.dart';
 import 'package:canteen/services/authentication.dart';
+import 'package:canteen/services/messaging.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
@@ -81,6 +83,8 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     Firebase.initializeApp().whenComplete(() => _navigateHome());
+    MessagingService.getToken().then((token) => print('token: $token'));
+    MessagingService.config('from main.dart');
   }
 
   @override
