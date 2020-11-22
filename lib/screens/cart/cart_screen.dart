@@ -50,9 +50,18 @@ class _MyCartState extends State<MyCart> {
           ...cart.itemList.map(
             (itemName) {
               MenuItem item = menu.menuItems[itemName];
+              if (item == null) {
+                cart.deleteItem(itemName);
+                return Container();
+              }
+              if (!item.isAvailable) {
+                cart.removeItem(item, delete: true);
+                return Container();
+              }
               total += (item.price * items[itemName]['quantity']).toDouble();
               items[itemName]['price'] = item.price.round();
               items[itemName].remove('id');
+              print(items);
               return Slidable(
                 key: ValueKey(itemName),
                 actionPane: SlidableDrawerActionPane(),

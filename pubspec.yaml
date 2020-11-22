@@ -48,7 +48,7 @@ dependencies:
   flutter_slidable: ^0.5.7
   scrollable_positioned_list: ^0.1.8
   razorpay_flutter: ^1.2.2
-  # onesignal_flutter: ^2.6.1
+  onesignal_flutter: ^2.6.1
 
 dev_dependencies:
   flutter_test:

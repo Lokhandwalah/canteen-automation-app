@@ -37,6 +37,11 @@ class Cart with ChangeNotifier {
     notifyListeners();
   }
 
+  void deleteItem(String oldItem) {
+    items.remove(oldItem);
+    DBService().updateCart(user, items);
+  }
+
   void removeAllItems() {
     items = {};
     DBService().updateCart(user, items);

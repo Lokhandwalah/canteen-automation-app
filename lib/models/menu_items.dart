@@ -43,19 +43,16 @@ class Menu with ChangeNotifier {
     updates = updateStream;
   }
 
-  StreamSubscription<QuerySnapshot> get updateStream =>
-      DBService.menu.snapshots().listen(onData);
+  get updateStream => DBService.menu.snapshots().listen(onData);
 
   void onData(QuerySnapshot snapshot) {
     print('adding items...');
-    snapshot.docs.forEach((doc) {
-      menu.menuItems.update(
-        doc.data()['name'].toString().toLowerCase(),
-        (_) => MenuItem(doc),
-        ifAbsent: () => MenuItem(doc),
-      );
-      notifyListeners();
-    });
+    menu.menuItems.clear();
+    snapshot.docs.forEach((doc) => menu.menuItems.putIfAbsent(
+          doc.data()['name'].toString().toLowerCase(),
+          () => MenuItem(doc),
+        ));
+    menu.notifyListeners();
   }
 
   List<MenuItem> get itemList => menu.menuItems.values.toList();

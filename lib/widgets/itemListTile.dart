@@ -26,66 +26,94 @@ class _MenuItemListTileState extends State<MenuItemListTile> {
   Widget build(BuildContext context) {
     final bool imageAvailable =
         widget.item.imageUrl != null && widget.item.imageUrl.isNotEmpty;
+    final isAvailable = widget.item.isAvailable;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: Card(
-        color: bg,
-        elevation: 3,
-        shadowColor: Colors.grey,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            if (imageAvailable)
-              GestureDetector(
-                onTap: () => setState(() => expanded = false),
-                child: AnimatedContainer(
-                  duration: Duration(milliseconds: 300),
-                  height: expanded ? 150 : 0,
-                  width: expanded ? MediaQuery.of(context).size.width : 0,
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                        image: FirebaseImage(widget.item.imageUrl),
-                        fit: BoxFit.fitWidth),
+      child: Stack(
+        children: [
+          Card(
+            color: bg,
+            elevation: 3,
+            shadowColor: Colors.grey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                if (imageAvailable)
+                  GestureDetector(
+                    onTap: () => setState(() => expanded = false),
+                    child: AnimatedContainer(
+                      duration: Duration(milliseconds: 300),
+                      height: expanded ? 150 : 0,
+                      width: expanded ? MediaQuery.of(context).size.width : 0,
+                      foregroundDecoration: isAvailable
+                          ? null
+                          : BoxDecoration(
+                              color: Colors.grey,
+                              backgroundBlendMode: BlendMode.saturation,
+                            ),
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                            image: FirebaseImage(widget.item.imageUrl),
+                            fit: BoxFit.fitWidth),
+                      ),
+                      curve: Curves.easeOutCubic,
+                    ),
                   ),
-                  curve: Curves.easeOutCubic,
-                ),
-              ),
-            ListTile(
-              onTap: !widget.insideCart && imageAvailable
-                  ? () => setState(() => expanded = true)
-                  : null,
-              leading: AnimatedContainer(
-                height: expanded ? 0 : 60,
-                width: expanded ? 0 : 60,
-                duration: Duration(milliseconds: 300),
-                decoration: BoxDecoration(shape: BoxShape.circle, boxShadow: [
-                  BoxShadow(
-                      color: Colors.grey[900],
-                      offset: Offset(4, 3),
-                      blurRadius: 5)
-                ]),
-                child: CircleAvatar(
-                  radius: 30,
-                  backgroundImage: imageAvailable
-                      ? FirebaseImage(widget.item.imageUrl)
+                ListTile(
+                  tileColor: isAvailable ? null : Colors.grey.withOpacity(0.5),
+                  onTap: !widget.insideCart && imageAvailable
+                      ? () => setState(() => expanded = true)
                       : null,
-                  child: imageAvailable ? null : Icon(Icons.fastfood_outlined),
+                  leading: AnimatedContainer(
+                    height: expanded ? 0 : 60,
+                    width: expanded ? 0 : 60,
+                    duration: Duration(milliseconds: 300),
+                    foregroundDecoration: isAvailable
+                        ? null
+                        : BoxDecoration(
+                            color: Colors.grey,
+                            backgroundBlendMode: BlendMode.saturation,
+                            shape: BoxShape.circle,
+                          ),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                            color: Colors.grey[900],
+                            offset: Offset(4, 3),
+                            blurRadius: 5)
+                      ],
+                    ),
+                    child: CircleAvatar(
+                      radius: 30,
+                      backgroundImage: imageAvailable
+                          ? FirebaseImage(widget.item.imageUrl)
+                          : null,
+                      child:
+                          imageAvailable ? null : Icon(Icons.fastfood_outlined),
+                    ),
+                  ),
+                  title: Text(widget.item.displayName()),
+                  subtitle: Text('₹${widget.item.price}'),
+                  trailing: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      IgnorePointer(
+                          ignoring: !isAvailable,
+                          child: ActionButtons(
+                              availability: isAvailable,
+                              cart: widget.cart,
+                              item: widget.item)),
+                      SizedBox(height: 5),
+                      if (widget.insideCart) _buildPrice(),
+                    ],
+                  ),
                 ),
-              ),
-              title: Text(widget.item.displayName()),
-              subtitle: Text('₹${widget.item.price}'),
-              trailing: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  ActionButtons(cart: widget.cart, item: widget.item),
-                  SizedBox(height: 5),
-                  if (widget.insideCart) _buildPrice(),
-                ],
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -98,14 +126,16 @@ class _MenuItemListTileState extends State<MenuItemListTile> {
 }
 
 class ActionButtons extends StatefulWidget {
-  const ActionButtons({
-    Key key,
-    @required this.cart,
-    @required this.item,
-  }) : super(key: key);
+  const ActionButtons(
+      {Key key,
+      @required this.cart,
+      @required this.item,
+      @required this.availability})
+      : super(key: key);
 
   final Cart cart;
   final MenuItem item;
+  final bool availability;
 
   @override
   _ActionButtonsState createState() => _ActionButtonsState();
@@ -119,7 +149,8 @@ class _ActionButtonsState extends State<ActionButtons> {
       height: 25,
       decoration: BoxDecoration(
           border: Border.all(width: 1, color: Colors.grey[900]),
-          borderRadius: BorderRadius.circular(5)),
+          borderRadius: BorderRadius.circular(5),
+          color: widget.availability ? null : Colors.grey),
       child: widget.cart.items.containsKey(widget.item.name)
           ? Row(
               mainAxisSize: MainAxisSize.min,
@@ -129,11 +160,12 @@ class _ActionButtonsState extends State<ActionButtons> {
                   child: GestureDetector(
                       onTap: () => widget.cart.removeItem(widget.item),
                       child: Icon(quantity == 1 ? Icons.delete : Icons.remove,
-                          size: 20, color: primary)),
+                          size: 20,
+                          color: widget.availability ? primary : null)),
                 ),
                 Container(
                   width: 20,
-                  color: primary,
+                  color: widget.availability ? primary : Colors.grey.shade600,
                   child: Center(
                     child: Text(quantity.toString()),
                   ),
@@ -141,7 +173,9 @@ class _ActionButtonsState extends State<ActionButtons> {
                 Expanded(
                   child: GestureDetector(
                       onTap: () => widget.cart.addItem(widget.item),
-                      child: Icon(Icons.add, size: 20, color: primary)),
+                      child: Icon(Icons.add,
+                          size: 20,
+                          color: widget.availability ? primary : null)),
                 ),
               ],
             )
@@ -153,7 +187,8 @@ class _ActionButtonsState extends State<ActionButtons> {
                   SizedBox(width: 5),
                   const Text('Add'),
                   SizedBox(width: 5),
-                  Icon(Icons.add, size: 16, color: primary),
+                  Icon(Icons.add,
+                      size: 16, color: widget.availability ? primary : null),
                 ],
               ),
             ),
