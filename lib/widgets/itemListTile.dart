@@ -33,21 +33,23 @@ class _MenuItemListTileState extends State<MenuItemListTile> {
         elevation: 3,
         shadowColor: Colors.grey,
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            GestureDetector(
-              onTap: () => setState(() => expanded = false),
-              child: AnimatedContainer(
-                duration: Duration(milliseconds: 300),
-                height: expanded ? 150 : 0,
-                width: expanded ? MediaQuery.of(context).size.width : 0,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                      image: FirebaseImage(widget.item.imageUrl),
-                      fit: BoxFit.fitWidth),
+            if (imageAvailable)
+              GestureDetector(
+                onTap: () => setState(() => expanded = false),
+                child: AnimatedContainer(
+                  duration: Duration(milliseconds: 300),
+                  height: expanded ? 150 : 0,
+                  width: expanded ? MediaQuery.of(context).size.width : 0,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                        image: FirebaseImage(widget.item.imageUrl),
+                        fit: BoxFit.fitWidth),
+                  ),
+                  curve: Curves.easeOutCubic,
                 ),
-                curve: Curves.easeOutCubic,
               ),
-            ),
             ListTile(
               onTap: !widget.insideCart && imageAvailable
                   ? () => setState(() => expanded = true)

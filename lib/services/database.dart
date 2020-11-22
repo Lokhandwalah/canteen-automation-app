@@ -1,7 +1,7 @@
 import 'package:canteen/models/cart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:steel_crypt/steel_crypt.dart';
-
+import 'package:intl/intl.dart';
 import '../models/user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -62,7 +62,8 @@ class DBService extends Database {
       @required double amount,
       @required PaymentType paymentType}) async {
     await db.runTransaction((transaction) async {
-      transaction.set(activeOrders.doc(), {
+      final ref  = orders.doc();
+      transaction.set(ref, {
         'bill': items,
         'total_amount': amount,
         'ordered_by': userEmail,
@@ -70,7 +71,7 @@ class DBService extends Database {
         'status': 'placed',
         'payment_type': paymentType == PaymentType.cash ? 'cash' : 'digital',
         'payment_status': paymentType == PaymentType.cash ? 'pending' : 'paid',
-        'placed_at': DateTime.now()
+        'placed_at': DateTime.now(),
       });
     });
   }

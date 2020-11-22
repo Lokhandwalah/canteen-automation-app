@@ -84,14 +84,14 @@ class _MyCartState extends State<MyCart> {
           Center(
             child: MyButton(
                 title: payOnline ? 'Proceed to Pay' : 'Place Order',
-                action: () => _handleOrder(payOnline, total)),
+                action: () => _handleOrder(payOnline, total, cart)),
           )
         ],
       ),
     );
   }
 
-  void _handleOrder(bool isOnlinePayment, double amount) async {
+  void _handleOrder(bool isOnlinePayment, double amount, Cart cart) async {
     showLoader(context);
     if (isOnlinePayment) {
       print('proceedign to Online payment....');
@@ -116,6 +116,7 @@ class _MyCartState extends State<MyCart> {
         amount: amount,
         paymentType: _paymentType);
     await Future.delayed(Duration(seconds: 1));
+    cart.removeAllItems();
     Navigator.of(context).pop();
     Toast.show('Order Placed Successfully', context);
   }

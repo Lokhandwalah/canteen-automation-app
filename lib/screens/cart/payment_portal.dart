@@ -60,6 +60,9 @@ class _PaymentPortalState extends State<PaymentPortal> {
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
+    print(
+      "ERROR: " + response.code.toString() + " - " + response.message,
+    );
     Toast.show("ERROR: " + response.code.toString() + " - " + response.message,
         context);
     Navigator.of(context).pop(false);

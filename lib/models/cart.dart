@@ -39,6 +39,7 @@ class Cart with ChangeNotifier {
 
   void removeAllItems() {
     items = {};
+    DBService().updateCart(user, items);
     notifyListeners();
   }
 

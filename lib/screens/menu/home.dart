@@ -22,28 +22,31 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final user = Provider.of<CurrentUser>(context);
     final cart = Provider.of<Cart>(context);
-    final menu = Provider.of<Menu>(context);
-    List<MenuItem> items = menu.menuItems.values.toList();
-    return Scaffold(
-        appBar: _buildAppBar(user),
-        body: CustomScrollView(
-          slivers: [
-            _buildSlider(),
-            _buildCategories(context, cart, menu),
-            SliverToBoxAdapter(child: SizedBox(height: 5)),
-            SliverAppBar(
-              floating: true,
-              backgroundColor: bg,
-              collapsedHeight: 60,
-              centerTitle: true,
-              title: _buildSearchField(context, cart, menu),
-            ),
-            SliverList(
-              delegate:
-                  SliverChildListDelegate(_buildCategoryItems(cart, items)),
-            ),
-          ],
-        ));
+    return Consumer<Menu>(
+      builder: (_, menu, child) {
+        List<MenuItem> items = menu.menuItems.values.toList();
+        return Scaffold(
+            appBar: _buildAppBar(user),
+            body: CustomScrollView(
+              slivers: [
+                _buildSlider(),
+                _buildCategories(context, cart, menu),
+                SliverToBoxAdapter(child: SizedBox(height: 5)),
+                SliverAppBar(
+                  floating: true,
+                  backgroundColor: bg,
+                  collapsedHeight: 60,
+                  centerTitle: true,
+                  title: _buildSearchField(context, cart, menu),
+                ),
+                SliverList(
+                  delegate:
+                      SliverChildListDelegate(_buildCategoryItems(cart, items)),
+                ),
+              ],
+            ));
+      },
+    );
   }
 
   SliverToBoxAdapter _buildSlider() {

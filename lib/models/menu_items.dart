@@ -21,29 +21,43 @@ class MenuItem {
   }
 
   String displayName() {
-    return this.name.substring(0, 1).toUpperCase() + name.substring(1);
+    List words = this.name.split(' ');
+    if (words.length == 1)
+      return words.first.substring(0, 1).toUpperCase() +
+          words.first.substring(1);
+    else {
+      String name = '';
+      words.forEach((words) => name +=
+          words.substring(0, 1).toUpperCase() + words.substring(1) + " ");
+      return name;
+    }
   }
 }
 
 class Menu with ChangeNotifier {
   Map<String, MenuItem> menuItems = {};
+  StreamSubscription<QuerySnapshot> updates;
   static Menu menu = Menu();
   Future<void> initialize({List<MenuItem> itemList}) async {
     await DBService.menu.get().then(onData);
-    DBService.menu.snapshots().listen(onData);
+    updates = updateStream;
   }
 
-  onData(QuerySnapshot snapshot) {
+  StreamSubscription<QuerySnapshot> get updateStream =>
+      DBService.menu.snapshots().listen(onData);
+
+  void onData(QuerySnapshot snapshot) {
     print('adding items...');
-    snapshot.docs.forEach(
-      (doc) => menu.menuItems.update(
+    snapshot.docs.forEach((doc) {
+      menu.menuItems.update(
         doc.data()['name'].toString().toLowerCase(),
         (_) => MenuItem(doc),
         ifAbsent: () => MenuItem(doc),
-      ),
-    );
-    notifyListeners();
+      );
+      notifyListeners();
+    });
   }
 
   List<MenuItem> get itemList => menu.menuItems.values.toList();
+  void cancel() => updates.cancel();
 }
