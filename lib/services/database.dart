@@ -62,8 +62,7 @@ class DBService extends Database {
       @required double amount,
       @required PaymentType paymentType}) async {
     await db.runTransaction((transaction) async {
-      final ref  = orders.doc();
-      transaction.set(ref, {
+      transaction.set(activeOrders.doc(), {
         'bill': items,
         'total_amount': amount,
         'ordered_by': userEmail,

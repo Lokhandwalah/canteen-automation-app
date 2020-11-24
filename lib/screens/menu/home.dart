@@ -202,7 +202,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           ...items
               .where((item) =>
-                  item.category.toLowerCase() == category.name.toLowerCase())
+                  item.category.toLowerCase() == category.name.toLowerCase() && item.isAvailable)
               .map(
                 (item) => MenuItemListTile(cart: cart, item: item),
               ),

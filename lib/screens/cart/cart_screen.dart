@@ -133,9 +133,26 @@ class _MyCartState extends State<MyCart> {
   Container _buildEmptyCart() {
     return Container(
         alignment: Alignment.center,
-        child: const Text(
-          'Your Cart is Empty',
-          style: TextStyle(color: primary, fontSize: 20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'images/basket.png',
+              color: primary,
+              height: 150,
+              width: 150,
+            ),
+            SizedBox(height: 30),
+            const Text(
+              'Your cart is Empty',
+              style: TextStyle(color: primary, fontSize: 20),
+            ),
+            SizedBox(height: 5),
+            const Text(
+              'Add something from the Menu',
+              style: TextStyle(color: primary, fontSize: 20),
+            ),
+          ],
         ));
   }
 
