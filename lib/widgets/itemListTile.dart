@@ -3,6 +3,7 @@ import 'package:canteen/models/menu_items.dart';
 import 'package:canteen/utilities/constants.dart';
 import 'package:firebase_image/firebase_image.dart';
 import 'package:flutter/material.dart';
+import 'package:toast/toast.dart';
 
 class MenuItemListTile extends StatefulWidget {
   const MenuItemListTile(
@@ -43,6 +44,7 @@ class _MenuItemListTileState extends State<MenuItemListTile> {
                     onTap: () => setState(() => expanded = false),
                     child: AnimatedContainer(
                       duration: Duration(milliseconds: 300),
+                      curve: Curves.easeOutCubic,
                       height: expanded ? 150 : 0,
                       width: expanded ? MediaQuery.of(context).size.width : 0,
                       foregroundDecoration: isAvailable
@@ -53,10 +55,9 @@ class _MenuItemListTileState extends State<MenuItemListTile> {
                             ),
                       decoration: BoxDecoration(
                         image: DecorationImage(
-                            image: FirebaseImage(widget.item.imageUrl),
+                            image: NetworkImage(widget.item.imageUrl),
                             fit: BoxFit.fitWidth),
                       ),
-                      curve: Curves.easeOutCubic,
                     ),
                   ),
                 ListTile(
@@ -87,7 +88,7 @@ class _MenuItemListTileState extends State<MenuItemListTile> {
                     child: CircleAvatar(
                       radius: 30,
                       backgroundImage: imageAvailable
-                          ? FirebaseImage(widget.item.imageUrl)
+                          ? NetworkImage(widget.item.imageUrl)
                           : null,
                       child:
                           imageAvailable ? null : Icon(Icons.fastfood_outlined),
@@ -99,12 +100,10 @@ class _MenuItemListTileState extends State<MenuItemListTile> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      IgnorePointer(
-                          ignoring: !isAvailable,
-                          child: ActionButtons(
-                              availability: isAvailable,
-                              cart: widget.cart,
-                              item: widget.item)),
+                      ActionButtons(
+                          availability: isAvailable,
+                          cart: widget.cart,
+                          item: widget.item),
                       SizedBox(height: 5),
                       if (widget.insideCart) _buildPrice(),
                     ],
@@ -159,7 +158,7 @@ class _ActionButtonsState extends State<ActionButtons> {
                 Expanded(
                   child: GestureDetector(
                       onTap: () => widget.cart.removeItem(widget.item),
-                      child: Icon(quantity == 1 ? Icons.delete : Icons.remove,
+                      child: Icon(Icons.remove,
                           size: 20,
                           color: widget.availability ? primary : null)),
                 ),
@@ -180,7 +179,9 @@ class _ActionButtonsState extends State<ActionButtons> {
               ],
             )
           : GestureDetector(
-              onTap: () => widget.cart.addItem(widget.item),
+              onTap: () => widget.item.isAvailable
+                  ? widget.cart.addItem(widget.item)
+                  : Toast.show('The item is currently unavailable', context),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

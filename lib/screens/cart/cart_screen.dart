@@ -1,16 +1,17 @@
 import 'package:canteen/models/cart.dart';
 import 'package:canteen/models/menu_items.dart';
 import 'package:canteen/models/user.dart';
-import 'package:canteen/screens/cart/payment_portal.dart';
+import 'package:canteen/screens/cart/order_placed.dart';
+import 'package:canteen/services/payment_portal.dart';
 import 'package:canteen/services/database.dart';
 import 'package:canteen/utilities/constants.dart';
 import 'package:canteen/widgets/custom_button.dart';
+import 'package:canteen/widgets/dialog_box.dart';
 import 'package:canteen/widgets/itemListTile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:provider/provider.dart';
-import 'package:toast/toast.dart';
 
 class MyCart extends StatefulWidget {
   @override
@@ -89,7 +90,7 @@ class _MyCartState extends State<MyCart> {
           ),
           SizedBox(height: 10),
           BillDetails(total),
-          _buildPaymentDetails(total),
+          _buildPaymentDetails(total)
           Center(
             child: MyButton(
                 title: payOnline ? 'Proceed to Pay' : 'Place Order',
@@ -102,9 +103,10 @@ class _MyCartState extends State<MyCart> {
 
   void _handleOrder(bool isOnlinePayment, double amount, Cart cart) async {
     showLoader(context);
+    Map<String, dynamic> result = {};
     if (isOnlinePayment) {
       print('proceedign to Online payment....');
-      bool paymentSuccess = await Navigator.of(context).push(
+      result = await Navigator.of(context).push(
         MaterialPageRoute(
           fullscreenDialog: true,
           builder: (_) => PaymentPortal(
@@ -113,21 +115,32 @@ class _MyCartState extends State<MyCart> {
           ),
         ),
       );
-      if (!paymentSuccess) {
+      if (!result['success']) {
         Navigator.of(context).pop();
+        showDialog(
+          context: context,
+          builder: (_) => DialogBox(
+            title: 'Error :(',
+            titleColor: Colors.red,
+            description: result['msg'],
+            buttonText1: 'Ok',
+            button1Func: () => Navigator.of(context).pop(),
+          ),
+        );
         return;
       }
     }
     await DBService().placeOrder(
-        userEmail: user.email,
-        username: user.name,
-        items: items,
-        amount: amount,
-        paymentType: _paymentType);
+      userEmail: user.email,
+      username: user.name,
+      items: items,
+      amount: amount,
+      paymentType: _paymentType,
+      paymentId: result['paymentId'],
+    );
     await Future.delayed(Duration(seconds: 1));
+    Navigator.of(context).pushReplacement(goTo(OrderPlaced()));
     cart.removeAllItems();
-    Navigator.of(context).pop();
-    Toast.show('Order Placed Successfully', context);
   }
 
   Container _buildEmptyCart() {
@@ -137,7 +150,7 @@ class _MyCartState extends State<MyCart> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-              'images/basket.png',
+              'assets/images/basket.png',
               color: primary,
               height: 150,
               width: 150,

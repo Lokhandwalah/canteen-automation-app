@@ -22,31 +22,29 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final user = Provider.of<CurrentUser>(context);
     final cart = Provider.of<Cart>(context);
-    return Consumer<Menu>(
-      builder: (_, menu, child) {
-        List<MenuItem> items = menu.menuItems.values.toList();
-        return Scaffold(
-            appBar: _buildAppBar(user),
-            body: CustomScrollView(
-              slivers: [
-                _buildSlider(),
-                _buildCategories(context, cart, menu),
-                SliverToBoxAdapter(child: SizedBox(height: 5)),
-                SliverAppBar(
-                  floating: true,
-                  backgroundColor: bg,
-                  collapsedHeight: 60,
-                  centerTitle: true,
-                  title: _buildSearchField(context, cart, menu),
-                ),
-                SliverList(
-                  delegate:
-                      SliverChildListDelegate(_buildCategoryItems(cart, items)),
-                ),
-              ],
-            ));
-      },
-    );
+    final menu = Provider.of<Menu>(context);
+    List<MenuItem> items = menu.menuItems.values.toList();
+    return Scaffold(
+        appBar: _buildAppBar(user),
+        bottomSheet: _buildBottomSheet(context),
+        body: CustomScrollView(
+          slivers: [
+            _buildSlider(),
+            _buildCategories(context, cart, menu),
+            SliverToBoxAdapter(child: SizedBox(height: 5)),
+            SliverAppBar(
+              floating: true,
+              backgroundColor: bg,
+              collapsedHeight: 60,
+              centerTitle: true,
+              title: _buildSearchField(context, cart, menu),
+            ),
+            SliverList(
+              delegate:
+                  SliverChildListDelegate(_buildCategoryItems(cart, items)),
+            ),
+          ],
+        ));
   }
 
   SliverToBoxAdapter _buildSlider() {
@@ -185,29 +183,51 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<Widget> _buildCategoryItems(Cart cart, List<MenuItem> items) {
     return Category.categories.map((category) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.fromLTRB(10, 20, 0, 8.0),
-            child: Text(
-              capitalize(category.name),
-              style: TextStyle(
-                  color: primary, fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ),
-          Divider(
-            color: primary,
-          ),
-          ...items
-              .where((item) =>
-                  item.category.toLowerCase() == category.name.toLowerCase() && item.isAvailable)
-              .map(
-                (item) => MenuItemListTile(cart: cart, item: item),
-              ),
-        ],
-      );
+      final filteredItems = items
+          .where((item) =>
+              item.category.toLowerCase() == category.name.toLowerCase() &&
+              item.isAvailable)
+          .toList();
+      return filteredItems.length == 0
+          ? Container()
+          : Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.fromLTRB(10, 20, 0, 8.0),
+                  child: Text(
+                    capitalize(category.name),
+                    style: TextStyle(
+                        color: primary,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Divider(
+                  color: primary,
+                ),
+                ...filteredItems.map(
+                  (item) => Hero(
+                      tag: item,
+                      child: MenuItemListTile(cart: cart, item: item)),
+                ),
+              ],
+            );
     }).toList();
+  }
+
+  Widget _buildBottomSheet(BuildContext context) {
+    return null;
+    return Container(
+      color: Colors.transparent,
+      child: Card(
+        color: primary,
+        child: Container(
+          height: 50,
+          width: 50,
+        ),
+      ),
+    );
   }
 }

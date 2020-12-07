@@ -56,21 +56,22 @@ class _PaymentPortalState extends State<PaymentPortal> {
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
     Toast.show("SUCCESS: " + response.paymentId, context);
-    Navigator.of(context).pop(true);
+    Navigator.of(context)
+        .pop({'success': true, 'paymentId': response.paymentId});
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
-    print(
-      "ERROR: " + response.code.toString() + " - " + response.message,
-    );
     Toast.show("ERROR: " + response.code.toString() + " - " + response.message,
         context);
-    Navigator.of(context).pop(false);
+    Navigator.of(context).pop({
+      'success': false,
+      'msg': response.message,
+      'code': response.code.toString()
+    });
   }
 
   void _handleExternalWallet(ExternalWalletResponse response) {
     Toast.show("EXTERNAL_WALLET: " + response.walletName, context);
-    Navigator.of(context).pop(false);
   }
 
   @override

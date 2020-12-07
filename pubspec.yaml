@@ -49,6 +49,7 @@ dependencies:
   scrollable_positioned_list: ^0.1.8
   razorpay_flutter: ^1.2.2
   onesignal_flutter: ^2.6.1
+  lottie: ^0.7.0
 
 dev_dependencies:
   flutter_test:
@@ -67,7 +68,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - images/
+    - assets/images/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

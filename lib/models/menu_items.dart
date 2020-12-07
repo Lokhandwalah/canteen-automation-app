@@ -6,8 +6,7 @@ import 'package:flutter/cupertino.dart';
 
 class MenuItem {
   final DocumentSnapshot itemDoc;
-  String name, category, imageUrl;
-  int id;
+  String name, category, imageUrl, id;
   double price;
   bool isAvailable;
   MenuItem(this.itemDoc) {
@@ -48,10 +47,17 @@ class Menu with ChangeNotifier {
   void onData(QuerySnapshot snapshot) {
     print('adding items...');
     menu.menuItems.clear();
-    snapshot.docs.forEach((doc) => menu.menuItems.putIfAbsent(
+    snapshot.docs.forEach((doc) {
+      try {
+        menu.menuItems.putIfAbsent(
           doc.data()['name'].toString().toLowerCase(),
           () => MenuItem(doc),
-        ));
+        );
+      } catch (e) {
+        print('Error: ' + e.toString());
+        print(doc.data());
+      }
+    });
     menu.notifyListeners();
   }
 

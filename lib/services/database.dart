@@ -60,16 +60,19 @@ class DBService extends Database {
       @required String username,
       @required Map<String, dynamic> items,
       @required double amount,
-      @required PaymentType paymentType}) async {
+      @required PaymentType paymentType, String paymentId}) async {
     await db.runTransaction((transaction) async {
+      bool  cashPayment = paymentType == PaymentType.cash;
       transaction.set(activeOrders.doc(), {
         'bill': items,
         'total_amount': amount,
         'ordered_by': userEmail,
         'username': username,
         'status': 'placed',
-        'payment_type': paymentType == PaymentType.cash ? 'cash' : 'digital',
-        'payment_status': paymentType == PaymentType.cash ? 'pending' : 'paid',
+        'payment_type': cashPayment ? 'cash' : 'digital',
+        'payment_status': cashPayment ? 'pending' : 'paid',
+        if(!cashPayment)
+        'razorpay_payment_id': paymentId,
         'placed_at': DateTime.now(),
       });
     });

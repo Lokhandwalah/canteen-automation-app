@@ -28,7 +28,7 @@ class _SearchPageState extends State<SearchPage> {
     _searchController = TextEditingController();
     _searchFocus = FocusNode();
     _iconController = AnimateIconController();
-    Future.delayed(Duration(milliseconds: 500))
+    Future.delayed(Duration(milliseconds: 700))
         .then((_) => _searchFocus.requestFocus());
   }
 
@@ -123,7 +123,9 @@ class _SearchPageState extends State<SearchPage> {
             )
           else
             ...items.map(
-              (item) => MenuItemListTile(cart: cart, item: item),
+              (item) => Hero(
+                tag:item,
+                child: MenuItemListTile(cart: cart, item: item)),
             ),
         ],
       ),

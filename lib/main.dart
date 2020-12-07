@@ -9,6 +9,7 @@ import 'package:canteen/services/messaging.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,8 +18,11 @@ import 'screens/cart/cart_screen.dart';
 import 'utilities/constants.dart';
 import 'screens/auth_screen.dart';
 
-void main() {
-  runApp(MyApp());
+void main() {WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+    .then((_) {
+      runApp(new MyApp());
+    });
 }
 
 class MyApp extends StatelessWidget {

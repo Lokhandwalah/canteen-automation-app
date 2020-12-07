@@ -49,14 +49,15 @@ class _MainScreenState extends State<MainScreen> {
             items: Screen.pages
                 .map(
                   (p) => BottomNavigationBarItem(
-                      icon: p.title == 'Cart'
-                          ? Badge(
-                              child: Icon(p.activeIcon),
-                              no: Provider.of<Cart>(context).items.length,
-                            )
-                          : Icon(p.activeIcon),
-                      activeIcon: Icon(p.icon),
-                      label: p.title),
+                    icon: p.title == 'Cart'
+                        ? Badge(
+                            child: Icon(p.activeIcon),
+                            no: Provider.of<Cart>(context).items.length,
+                          )
+                        : Icon(p.activeIcon),
+                    activeIcon: Icon(p.icon),
+                    label: p.title,
+                  ),
                 )
                 .toList()),
         body: IndexedStack(
