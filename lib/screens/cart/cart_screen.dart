@@ -90,7 +90,7 @@ class _MyCartState extends State<MyCart> {
           ),
           SizedBox(height: 10),
           BillDetails(total),
-          _buildPaymentDetails(total)
+          _buildPaymentDetails(total),
           Center(
             child: MyButton(
                 title: payOnline ? 'Proceed to Pay' : 'Place Order',
