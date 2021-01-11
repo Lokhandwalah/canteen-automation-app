@@ -35,7 +35,6 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // StatusBar.color(_currentIndex == 1 ? white : primary);
     return WillPopScope(
       onWillPop: () => _onWillPop(context),
       child: Scaffold(

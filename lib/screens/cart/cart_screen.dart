@@ -62,7 +62,6 @@ class _MyCartState extends State<MyCart> {
               total += (item.price * items[itemName]['quantity']).toDouble();
               items[itemName]['price'] = item.price.round();
               items[itemName].remove('id');
-              print(items);
               return Slidable(
                 key: ValueKey(itemName),
                 actionPane: SlidableDrawerActionPane(),
@@ -81,6 +80,7 @@ class _MyCartState extends State<MyCart> {
                       cart.removeItem(item, delete: true),
                 ),
                 child: MenuItemListTile(
+                  user: user,
                   item: item,
                   cart: cart,
                   insideCart: true,

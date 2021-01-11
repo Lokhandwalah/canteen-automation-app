@@ -18,11 +18,12 @@ import 'screens/cart/cart_screen.dart';
 import 'utilities/constants.dart';
 import 'screens/auth_screen.dart';
 
-void main() {WidgetsFlutterBinding.ensureInitialized();
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
-    .then((_) {
-      runApp(new MyApp());
-    });
+      .then((_) {
+    runApp(new MyApp());
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -62,18 +63,17 @@ class _SplashScreenState extends State<SplashScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool isLoggedIn = AuthService().isUserLoggedIn();
     CurrentUser user;
-    if (isLoggedIn) {
-      print('user is already logged in');
-      user = await UserData.setData(prefs.getString('email'));
-    }
     await Menu().initialize();
     await Category.initialize();
+    if (isLoggedIn) user = await UserData.setData(prefs.getString('email'));
     Navigator.of(context).pushReplacement(
       goTo(
         isLoggedIn
             ? MultiProvider(providers: [
-                ChangeNotifierProvider<CurrentUser>.value(value: user),
-                ChangeNotifierProvider<Cart>.value(value: user.cart),
+                ChangeNotifierProvider<CurrentUser>.value(
+                    value: user),
+                ChangeNotifierProvider<Cart>.value(
+                    value: user.cart),
                 ChangeNotifierProvider<Menu>.value(value: Menu.menu),
               ], child: MainScreen())
             : AuthScreen(),

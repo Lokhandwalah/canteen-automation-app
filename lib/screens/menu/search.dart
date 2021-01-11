@@ -2,6 +2,7 @@ import 'package:animate_icons/animate_icons.dart';
 import 'package:canteen/models/cart.dart';
 import 'package:canteen/models/category.dart';
 import 'package:canteen/models/menu_items.dart';
+import 'package:canteen/models/user.dart';
 import 'package:canteen/utilities/constants.dart';
 import 'package:canteen/widgets/itemListTile.dart';
 import 'package:firebase_image/firebase_image.dart';
@@ -28,8 +29,8 @@ class _SearchPageState extends State<SearchPage> {
     _searchController = TextEditingController();
     _searchFocus = FocusNode();
     _iconController = AnimateIconController();
-    Future.delayed(Duration(milliseconds: 700))
-        .then((_) => _searchFocus.requestFocus());
+    // Future.delayed(Duration(milliseconds: 700))
+    //     .then((_) => _searchFocus.requestFocus());
   }
 
   @override
@@ -41,14 +42,15 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<CurrentUser>(context);
     final cart = Provider.of<Cart>(context);
     final menu = Provider.of<Menu>(context);
     return Scaffold(
       backgroundColor: bg,
       body: CustomScrollView(slivers: [
         _buildSearchBar(),
-        _buildSearchCategory(cart, menu),
-        _buildSearchItems(cart, menu.itemList)
+        _buildSearchCategory(user, cart, menu),
+        _buildSearchItems(user, cart, menu.itemList)
       ]),
     );
   }
@@ -103,7 +105,8 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
-  SliverList _buildSearchItems(Cart cart, List<MenuItem> items) {
+  SliverList _buildSearchItems(
+      CurrentUser user, Cart cart, List<MenuItem> items) {
     final query = _searchController.text;
     items = items
         .where(
@@ -124,15 +127,19 @@ class _SearchPageState extends State<SearchPage> {
           else
             ...items.map(
               (item) => Hero(
-                tag:item,
-                child: MenuItemListTile(cart: cart, item: item)),
+                  tag: item,
+                  child: MenuItemListTile(
+                    cart: cart,
+                    item: item,
+                    user: user,
+                  )),
             ),
         ],
       ),
     );
   }
 
-  Widget _buildSearchCategory(Cart cart, Menu menu) {
+  Widget _buildSearchCategory(CurrentUser user,Cart cart, Menu menu) {
     final query = _searchController.text;
     final categories = Category.categories
         .where((category) =>
@@ -149,6 +156,7 @@ class _SearchPageState extends State<SearchPage> {
                     fullscreenDialog: true,
                     transitionDuration: Duration(milliseconds: 500),
                     pageBuilder: (_, __, ___) => MultiProvider(providers: [
+                      ChangeNotifierProvider<CurrentUser>.value(value: user),
                       ChangeNotifierProvider<Cart>.value(value: cart),
                       ChangeNotifierProvider<Menu>.value(value: menu),
                     ], child: CategoryItems(category)),

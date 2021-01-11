@@ -26,22 +26,21 @@ class _HomeScreenState extends State<HomeScreen> {
     List<MenuItem> items = menu.menuItems.values.toList();
     return Scaffold(
         appBar: _buildAppBar(user),
-        bottomSheet: _buildBottomSheet(context),
         body: CustomScrollView(
           slivers: [
             _buildSlider(),
-            _buildCategories(context, cart, menu),
+            _buildCategories(context),
             SliverToBoxAdapter(child: SizedBox(height: 5)),
             SliverAppBar(
               floating: true,
               backgroundColor: bg,
               collapsedHeight: 60,
               centerTitle: true,
-              title: _buildSearchField(context, cart, menu),
+              title: _buildSearchField(context, user),
             ),
             SliverList(
               delegate:
-                  SliverChildListDelegate(_buildCategoryItems(cart, items)),
+                  SliverChildListDelegate(_buildCategoryItems(user, cart, items)),
             ),
           ],
         ));
@@ -68,13 +67,16 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildSearchField(BuildContext context, Cart cart, Menu menu) {
+  Widget _buildSearchField(BuildContext context, CurrentUser user) {
+    final cart = Provider.of<Cart>(context);
+    final menu = Provider.of<Menu>(context);
     return GestureDetector(
       onTap: () => Navigator.of(context).push(
         PageRouteBuilder(
           fullscreenDialog: true,
-          transitionDuration: Duration(milliseconds: 500),
+          transitionDuration: Duration(milliseconds: 700),
           pageBuilder: (_, __, ___) => MultiProvider(providers: [
+            ChangeNotifierProvider<CurrentUser>.value(value: user),
             ChangeNotifierProvider<Cart>.value(value: cart),
             ChangeNotifierProvider<Menu>.value(value: menu),
           ], child: SearchPage()),
@@ -119,7 +121,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildCategories(BuildContext context, Cart cart, Menu menu) {
+  Widget _buildCategories(BuildContext context) {
+    final user = Provider.of<CurrentUser>(context);
+    final cart = Provider.of<Cart>(context);
+    final menu = Provider.of<Menu>(context);
     return SliverGrid(
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 4, crossAxisSpacing: 0, mainAxisSpacing: 5),
@@ -129,8 +134,9 @@ class _HomeScreenState extends State<HomeScreen> {
           onTap: () => Navigator.of(context).push(
             PageRouteBuilder(
               fullscreenDialog: true,
-              transitionDuration: Duration(milliseconds: 500),
+              transitionDuration: Duration(milliseconds: 700),
               pageBuilder: (_, __, ___) => MultiProvider(providers: [
+                ChangeNotifierProvider<CurrentUser>.value(value: user),
                 ChangeNotifierProvider<Cart>.value(value: cart),
                 ChangeNotifierProvider<Menu>.value(value: menu),
               ], child: CategoryItems(category)),
@@ -181,7 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  List<Widget> _buildCategoryItems(Cart cart, List<MenuItem> items) {
+  List<Widget> _buildCategoryItems(CurrentUser user, Cart cart, List<MenuItem> items) {
     return Category.categories.map((category) {
       final filteredItems = items
           .where((item) =>
@@ -210,24 +216,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 ...filteredItems.map(
                   (item) => Hero(
                       tag: item,
-                      child: MenuItemListTile(cart: cart, item: item)),
+                      child: MenuItemListTile(
+                        user: user,
+                        cart: cart, item: item)),
                 ),
               ],
             );
     }).toList();
   }
 
-  Widget _buildBottomSheet(BuildContext context) {
-    return null;
-    return Container(
-      color: Colors.transparent,
-      child: Card(
-        color: primary,
-        child: Container(
-          height: 50,
-          width: 50,
-        ),
-      ),
-    );
-  }
 }

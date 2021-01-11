@@ -20,7 +20,7 @@ class MenuItem {
   }
 
   String displayName() {
-    List words = this.name.split(' ');
+    List words = this.name.toLowerCase().split(' ');
     if (words.length == 1)
       return words.first.substring(0, 1).toUpperCase() +
           words.first.substring(1);

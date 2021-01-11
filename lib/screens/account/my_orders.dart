@@ -22,9 +22,11 @@ class _MyOrdersState extends State<MyOrders> {
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-              child: Column(
+        child: Column(
           children: [
+            _buildHeading('Active:'),
             _buildActiveOrders(user),
+            _buildHeading('Completed:'),
             _buildRecentOrders(user),
           ],
         ),
@@ -56,6 +58,7 @@ class _MyOrdersState extends State<MyOrders> {
     return StreamBuilder<QuerySnapshot>(
       stream: DBService.activeOrders
           .where('ordered_by', isEqualTo: user.email)
+          .orderBy('placed_at', descending: true)
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return loader();
@@ -127,4 +130,18 @@ class _MyOrdersState extends State<MyOrders> {
       ),
     );
   }
+
+  Widget _buildHeading(String s) => Container(
+        alignment: Alignment.centerLeft,
+        decoration: BoxDecoration(),
+        padding: const EdgeInsets.only(left: 10, top: 15, bottom: 5),
+        child: Text(
+          s,
+          style: TextStyle(
+            color: primary,
+            fontSize: 18,
+            letterSpacing: 1,
+          ),
+        ),
+      );
 }

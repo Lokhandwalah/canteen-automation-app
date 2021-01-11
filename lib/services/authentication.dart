@@ -37,7 +37,7 @@ class AuthService extends BaseAuth {
         print(e.toString());
         return {"success": false, 'msg': 'Google Signin Cancelled'};
       }
-      final userDoc = await DBService().getUserDoc(googleUser.email);
+      final userDoc = await DBService().findUserDoc(googleUser.email);
       if (userDoc == null) {
         await googleSignIn.signOut();
         return {
@@ -130,7 +130,7 @@ class AuthService extends BaseAuth {
         print(e.toString());
         return {"success": false, 'msg': 'Google Signin Cancelled'};
       }
-      final userDoc = await DBService().getUserDoc(googleUser.email);
+      final userDoc = await DBService().findUserDoc(googleUser.email);
       if (userDoc != null) {
         await googleSignIn.signOut();
         return {

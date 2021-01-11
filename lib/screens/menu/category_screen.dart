@@ -1,6 +1,7 @@
 import 'package:canteen/models/cart.dart';
 import 'package:canteen/models/category.dart';
 import 'package:canteen/models/menu_items.dart';
+import 'package:canteen/models/user.dart';
 import 'package:canteen/utilities/constants.dart';
 import 'package:canteen/widgets/itemListTile.dart';
 import 'package:firebase_image/firebase_image.dart';
@@ -27,6 +28,7 @@ class _CategoryItemsState extends State<CategoryItems> {
 
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<CurrentUser>(context);
     cart = Provider.of<Cart>(context);
     items = Provider.of<Menu>(context).itemList;
     return Scaffold(
@@ -59,13 +61,13 @@ class _CategoryItemsState extends State<CategoryItems> {
             ),
             pinned: true,
           ),
-          _buildItemsList(category),
+          _buildItemsList(user, category),
         ],
       ),
     );
   }
 
-  Widget _buildItemsList(Category category) {
+  Widget _buildItemsList(CurrentUser user, Category category) {
     final filteredItems = items
         .where((item) =>
             item.category.toLowerCase() == category.name.toLowerCase())
@@ -73,7 +75,9 @@ class _CategoryItemsState extends State<CategoryItems> {
     return SliverList(
       delegate: SliverChildListDelegate(
         filteredItems
-            .map((item) => MenuItemListTile(cart: cart, item: item))
+            .map((item) => MenuItemListTile(
+              user: user,
+              cart: cart, item: item,))
             .toList(),
       ),
     );
