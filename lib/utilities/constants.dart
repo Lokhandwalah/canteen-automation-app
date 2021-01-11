@@ -46,11 +46,20 @@ Widget loader() => Platform.isIOS
 
 //slider imageList
 List<String> imageList() => [
-  'https://www.thespruceeats.com/thmb/XDmwhz9HXEMxhus08YhlIvTuAZI=/3865x2174/smart/filters:no_upscale()/paneer-makhani-or-shahi-paneer-indian-food-670906899-5878ef725f9b584db3d890f4.jpg',
-  'https://media.cntraveller.in/wp-content/uploads/2020/05/dosa-recipes-866x487.jpg',
-  'https://www.loveandoliveoil.com/wp-content/uploads/2015/03/soy-sauce-noodlesH2.jpg',
-  'https://cdn.cdnparenting.com/articles/2020/02/26144447/PULAV.jpg'
-];
+      'https://www.thespruceeats.com/thmb/XDmwhz9HXEMxhus08YhlIvTuAZI=/3865x2174/smart/filters:no_upscale()/paneer-makhani-or-shahi-paneer-indian-food-670906899-5878ef725f9b584db3d890f4.jpg',
+      'https://media.cntraveller.in/wp-content/uploads/2020/05/dosa-recipes-866x487.jpg',
+      'https://www.loveandoliveoil.com/wp-content/uploads/2015/03/soy-sauce-noodlesH2.jpg',
+      'https://cdn.cdnparenting.com/articles/2020/02/26144447/PULAV.jpg'
+    ];
 
-String capitalize(String name) =>
-    name.substring(0, 1).toUpperCase() + name.substring(1);
+String capitalize(String name) {
+  List words = name.split(' ');
+  if (words.length == 1)
+    return words.first.substring(0, 1).toUpperCase() + words.first.substring(1);
+  else {
+    String name = '';
+    words.forEach((words) =>
+        name += words.substring(0, 1).toUpperCase() + words.substring(1) + " ");
+    return name;
+  }
+}

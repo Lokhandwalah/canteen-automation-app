@@ -1,7 +1,7 @@
 import 'package:canteen/models/cart.dart';
+import 'package:canteen/models/menu_items.dart';
 import 'package:canteen/models/user.dart';
 import 'package:canteen/screens/user_auth/forgot_password.dart';
-import 'package:canteen/screens/menu/home.dart';
 import 'package:canteen/services/authentication.dart';
 import 'package:canteen/utilities/constants.dart';
 import 'package:canteen/utilities/validation.dart';
@@ -13,6 +13,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:provider/provider.dart';
+
+import '../main_screen.dart';
 
 class LoginForm extends StatefulWidget {
   final GlobalKey<FlipCardState> flipkey;
@@ -44,7 +46,6 @@ class _LoginFormState extends State<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
-    // _loading = false;
     return SafeArea(
       child: AbsorbPointer(
         absorbing: _loading,
@@ -96,7 +97,6 @@ class _LoginFormState extends State<LoginForm> {
                           return 'Minimum 6 characters';
                         return null;
                       },
-                      // onChanged: (value) => _password = value.trim(),
                     ),
                   ),
                   _loading
@@ -215,6 +215,7 @@ class _LoginFormState extends State<LoginForm> {
           MultiProvider(providers: [
             ChangeNotifierProvider<CurrentUser>.value(value: currentUser),
             ChangeNotifierProvider<Cart>.value(value: currentUser.cart),
+                ChangeNotifierProvider<Menu>.value(value: Menu.menu),
           ], child: MainScreen()),
         ),
       );

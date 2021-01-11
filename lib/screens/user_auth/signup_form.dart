@@ -1,6 +1,6 @@
 import 'package:canteen/models/cart.dart';
+import 'package:canteen/models/menu_items.dart';
 import 'package:canteen/models/user.dart';
-import 'package:canteen/screens/menu/home.dart';
 import 'package:canteen/services/authentication.dart';
 import 'package:canteen/services/database.dart';
 import 'package:canteen/utilities/constants.dart';
@@ -14,6 +14,7 @@ import 'package:provider/provider.dart';
 
 import '../../widgets/custom_button.dart';
 import '../../widgets/dialog_box.dart';
+import '../main_screen.dart';
 
 class SignupForm extends StatefulWidget {
   final GlobalKey<FlipCardState> flipkey;
@@ -24,7 +25,7 @@ class SignupForm extends StatefulWidget {
 
 class _SignupFormState extends State<SignupForm> {
   final _formKey = GlobalKey<FormState>();
-  bool _autoValidate = false, _loading = false, _showPassword = false;
+  bool  _loading = false, _showPassword = false;
   TextEditingController _nameController,
       _emailController,
       _passwordController,
@@ -65,7 +66,7 @@ class _SignupFormState extends State<SignupForm> {
           child: SingleChildScrollView(
             child: Form(
               key: _formKey,
-              autovalidate: _autoValidate,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
               child: Column(
                 children: [
                   Text(
@@ -109,7 +110,7 @@ class _SignupFormState extends State<SignupForm> {
                       controller: _phoneController,
                       keyboardType: TextInputType.phone,
                       inputFormatters: [
-                        WhitelistingTextInputFormatter.digitsOnly
+                        FilteringTextInputFormatter.digitsOnly
                       ],
                       decoration: roundedTFDecoration(
                           hintText: 'Phone', prefixIcon: Icons.phone),
@@ -218,8 +219,6 @@ class _SignupFormState extends State<SignupForm> {
                                 action: () {
                                   if (_formKey.currentState.validate())
                                     _handleSignup();
-                                  else
-                                    setState(() => _autoValidate = true);
                                 }),
                             MyButton(
                                 title: 'Signup with Google',
@@ -300,6 +299,7 @@ class _SignupFormState extends State<SignupForm> {
           MultiProvider(providers: [
             ChangeNotifierProvider<CurrentUser>.value(value: currentUser),
             ChangeNotifierProvider<Cart>.value(value: currentUser.cart),
+                ChangeNotifierProvider<Menu>.value(value: Menu.menu),
           ], child: MainScreen()),
         ),
       );

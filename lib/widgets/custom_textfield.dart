@@ -11,7 +11,7 @@ class RoundedTextField extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(top: 10),
       child: Stack(
-        overflow: Overflow.visible,
+        clipBehavior: Clip.none,
         children: [
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 4),

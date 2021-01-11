@@ -2,21 +2,28 @@ import 'package:canteen/models/cart.dart';
 import 'package:canteen/models/category.dart';
 import 'package:canteen/models/user.dart';
 import 'package:canteen/screens/account/account.dart';
+import 'package:canteen/screens/main_screen.dart';
+import 'package:canteen/screens/menu/search.dart';
 import 'package:canteen/services/authentication.dart';
+import 'package:canteen/services/messaging.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:page_transition/page_transition.dart';
+import 'package:flutter/services.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'models/menu_items.dart';
 import 'screens/cart/cart_screen.dart';
 import 'utilities/constants.dart';
-import 'screens/menu/home.dart';
 import 'screens/auth_screen.dart';
 
 void main() {
-  runApp(MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((_) {
+    runApp(new MyApp());
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -38,6 +45,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => MainScreen(),
         '/auth': (context) => AuthScreen(),
         '/cart': (context) => MyCart(),
+        '/search': (context) => SearchPage(),
         '/account': (context) => MyAccount()
       },
     );
@@ -55,29 +63,31 @@ class _SplashScreenState extends State<SplashScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool isLoggedIn = AuthService().isUserLoggedIn();
     CurrentUser user;
-    Menu menu = Menu();
-    if (isLoggedIn) {
-      print('user is already logged in');
-      user = await UserData.setData(prefs.getString('email'));
-    }
-    await menu.initialize();
+    await Menu().initialize();
     await Category.initialize();
-    Navigator.of(context).pushReplacement(PageTransition(
-        child: isLoggedIn
+    if (isLoggedIn) user = await UserData.setData(prefs.getString('email'));
+    Navigator.of(context).pushReplacement(
+      goTo(
+        isLoggedIn
             ? MultiProvider(providers: [
-                ChangeNotifierProvider<CurrentUser>.value(value: user),
-                ChangeNotifierProvider<Cart>.value(value: user.cart),
-                ChangeNotifierProvider<Menu>.value(value: menu),
+                ChangeNotifierProvider<CurrentUser>.value(
+                    value: user),
+                ChangeNotifierProvider<Cart>.value(
+                    value: user.cart),
+                ChangeNotifierProvider<Menu>.value(value: Menu.menu),
               ], child: MainScreen())
             : AuthScreen(),
-        type: rightToLeft,
-        duration: Duration(milliseconds: 500)));
+      ),
+    );
   }
 
   @override
   void initState() {
     super.initState();
     Firebase.initializeApp().whenComplete(() => _navigateHome());
+    MessagingService.getToken().then((token) => print('token: $token'));
+    MessagingService.config('from main.dart');
+    configOneSignal();
   }
 
   @override
@@ -107,4 +117,21 @@ class _SplashScreenState extends State<SplashScreen> {
       ),
     );
   }
+}
+
+Future<void> configOneSignal() async {
+  // //Remove this method to stop OneSignal Debugging
+  // OneSignal.shared.setLogLevel(OSLogLevel.verbose, OSLogLevel.none);
+
+  await OneSignal.shared.init("39699aea-982e-4cb9-9eed-a85322a8f0d4",
+      iOSSettings: {
+        OSiOSSettings.autoPrompt: false,
+        OSiOSSettings.inAppLaunchUrl: true
+      });
+  OneSignal.shared
+      .setInFocusDisplayType(OSNotificationDisplayType.notification);
+
+// The promptForPushNotificationsWithUserResponse function will show the iOS push notification prompt. We recommend removing the following code and instead using an In-App Message to prompt for notification permission
+  // await OneSignal.shared
+  //     .promptUserForPushNotificationPermission(fallbackToSettings: true);
 }

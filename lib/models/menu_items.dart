@@ -6,8 +6,7 @@ import 'package:flutter/cupertino.dart';
 
 class MenuItem {
   final DocumentSnapshot itemDoc;
-  String name, category, imageUrl;
-  int id;
+  String name, category, imageUrl, id;
   double price;
   bool isAvailable;
   MenuItem(this.itemDoc) {
@@ -21,28 +20,47 @@ class MenuItem {
   }
 
   String displayName() {
-    return this.name.substring(0, 1).toUpperCase() + name.substring(1);
+    List words = this.name.toLowerCase().split(' ');
+    if (words.length == 1)
+      return words.first.substring(0, 1).toUpperCase() +
+          words.first.substring(1);
+    else {
+      String name = '';
+      words.forEach((words) => name +=
+          words.substring(0, 1).toUpperCase() + words.substring(1) + " ");
+      return name;
+    }
   }
 }
 
 class Menu with ChangeNotifier {
   Map<String, MenuItem> menuItems = {};
+  StreamSubscription<QuerySnapshot> updates;
+  static Menu menu = Menu();
   Future<void> initialize({List<MenuItem> itemList}) async {
     await DBService.menu.get().then(onData);
-    DBService.menu.snapshots().listen(onData);
+    updates = updateStream;
   }
 
-  onData(QuerySnapshot snapshot) {
+  get updateStream => DBService.menu.snapshots().listen(onData);
+
+  void onData(QuerySnapshot snapshot) {
     print('adding items...');
-    snapshot.docs.forEach(
-      (doc) => menuItems.update(
-        doc.data()['name'].toString().toLowerCase(),
-        (_) => MenuItem(doc),
-        ifAbsent: () => MenuItem(doc),
-      ),
-    );
-    notifyListeners();
+    menu.menuItems.clear();
+    snapshot.docs.forEach((doc) {
+      try {
+        menu.menuItems.putIfAbsent(
+          doc.data()['name'].toString().toLowerCase(),
+          () => MenuItem(doc),
+        );
+      } catch (e) {
+        print('Error: ' + e.toString());
+        print(doc.data());
+      }
+    });
+    menu.notifyListeners();
   }
 
-  List<MenuItem> get itemList => menuItems.values.toList();
+  List<MenuItem> get itemList => menu.menuItems.values.toList();
+  void cancel() => updates.cancel();
 }

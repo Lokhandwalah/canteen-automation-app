@@ -1,14 +1,17 @@
 import 'package:canteen/models/cart.dart';
 import 'package:canteen/models/menu_items.dart';
 import 'package:canteen/models/user.dart';
-import 'package:canteen/screens/menu/home.dart';
+import 'package:canteen/screens/cart/order_placed.dart';
+import 'package:canteen/services/payment_portal.dart';
 import 'package:canteen/services/database.dart';
 import 'package:canteen/utilities/constants.dart';
 import 'package:canteen/widgets/custom_button.dart';
+import 'package:canteen/widgets/dialog_box.dart';
+import 'package:canteen/widgets/itemListTile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:provider/provider.dart';
-import 'package:toast/toast.dart';
 
 class MyCart extends StatefulWidget {
   @override
@@ -48,13 +51,40 @@ class _MyCartState extends State<MyCart> {
           ...cart.itemList.map(
             (itemName) {
               MenuItem item = menu.menuItems[itemName];
+              if (item == null) {
+                cart.deleteItem(itemName);
+                return Container();
+              }
+              if (!item.isAvailable) {
+                cart.removeItem(item, delete: true);
+                return Container();
+              }
               total += (item.price * items[itemName]['quantity']).toDouble();
-              items[itemName]['price'] = item.price;
+              items[itemName]['price'] = item.price.round();
               items[itemName].remove('id');
-              return MenuItemListTile(
-                item: item,
-                cart: cart,
-                insideCart: true,
+              return Slidable(
+                key: ValueKey(itemName),
+                actionPane: SlidableDrawerActionPane(),
+                secondaryActions: <Widget>[
+                  IconSlideAction(
+                    caption: 'Remove',
+                    icon: Icons.delete,
+                    color: Colors.red,
+                    onTap: () => cart.removeItem(item, delete: true),
+                    closeOnTap: true,
+                  )
+                ],
+                dismissal: SlidableDismissal(
+                  child: SlidableDrawerDismissal(),
+                  onDismissed: (actionType) =>
+                      cart.removeItem(item, delete: true),
+                ),
+                child: MenuItemListTile(
+                  user: user,
+                  item: item,
+                  cart: cart,
+                  insideCart: true,
+                ),
               );
             },
           ),
@@ -64,18 +94,19 @@ class _MyCartState extends State<MyCart> {
           Center(
             child: MyButton(
                 title: payOnline ? 'Proceed to Pay' : 'Place Order',
-                action: () => _handleOrder(payOnline, total)),
+                action: () => _handleOrder(payOnline, total, cart)),
           )
         ],
       ),
     );
   }
 
-  void _handleOrder(bool isOnlinePayment, double amount) async {
+  void _handleOrder(bool isOnlinePayment, double amount, Cart cart) async {
     showLoader(context);
+    Map<String, dynamic> result = {};
     if (isOnlinePayment) {
       print('proceedign to Online payment....');
-      bool paymentSuccess = await Navigator.of(context).push(
+      result = await Navigator.of(context).push(
         MaterialPageRoute(
           fullscreenDialog: true,
           builder: (_) => PaymentPortal(
@@ -84,28 +115,57 @@ class _MyCartState extends State<MyCart> {
           ),
         ),
       );
-      if (!paymentSuccess) {
+      if (!result['success']) {
         Navigator.of(context).pop();
+        showDialog(
+          context: context,
+          builder: (_) => DialogBox(
+            title: 'Error :(',
+            titleColor: Colors.red,
+            description: result['msg'],
+            buttonText1: 'Ok',
+            button1Func: () => Navigator.of(context).pop(),
+          ),
+        );
         return;
       }
     }
     await DBService().placeOrder(
-        userEmail: user.email,
-        username: user.name,
-        items: items,
-        amount: amount,
-        paymentType: _paymentType);
+      userEmail: user.email,
+      username: user.name,
+      items: items,
+      amount: amount,
+      paymentType: _paymentType,
+      paymentId: result['paymentId'],
+    );
     await Future.delayed(Duration(seconds: 1));
-    Navigator.of(context).pop();
-    Toast.show('Order Placed Successfully', context);
+    Navigator.of(context).pushReplacement(goTo(OrderPlaced()));
+    cart.removeAllItems();
   }
 
   Container _buildEmptyCart() {
     return Container(
         alignment: Alignment.center,
-        child: const Text(
-          'Your Cart is Empty',
-          style: TextStyle(color: primary, fontSize: 20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/images/basket.png',
+              color: primary,
+              height: 150,
+              width: 150,
+            ),
+            SizedBox(height: 30),
+            const Text(
+              'Your cart is Empty',
+              style: TextStyle(color: primary, fontSize: 20),
+            ),
+            SizedBox(height: 5),
+            const Text(
+              'Add something from the Menu',
+              style: TextStyle(color: primary, fontSize: 20),
+            ),
+          ],
         ));
   }
 

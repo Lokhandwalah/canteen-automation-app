@@ -1,10 +1,15 @@
+import 'package:canteen/models/cart.dart';
+import 'package:canteen/models/menu_items.dart';
 import 'package:canteen/models/user.dart';
+import 'package:canteen/screens/account/my_favs.dart';
 import 'package:canteen/utilities/constants.dart';
+import 'package:provider/provider.dart';
 import '../../widgets/dialog_box.dart';
 import '../../services/authentication.dart';
 import 'package:flutter/material.dart';
 
 import '../auth_screen.dart';
+import 'my_orders.dart';
 
 class MyAccount extends StatefulWidget {
   @override
@@ -12,14 +17,18 @@ class MyAccount extends StatefulWidget {
 }
 
 class _MyAccountState extends State<MyAccount> {
+  CurrentUser user;
+  Menu menu;
+  Cart cart;
   @override
   Widget build(BuildContext context) {
-    final user = CurrentUser.user;
+    user = Provider.of<CurrentUser>(context);
+    menu = Provider.of<Menu>(context);
+    cart = Provider.of<Cart>(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Account'),
         centerTitle: true,
-        actions: [_buildSignout(context)],
       ),
       body: SafeArea(
         child: Column(
@@ -45,90 +54,101 @@ class _MyAccountState extends State<MyAccount> {
                 ),
               ),
             ),
-            Card(
-              color: bg,
-              child: ListTile(
-                title: Text(
-                  'My orders',
-                ),
-                leading: Icon(
-                  Icons.fastfood,
-                  color: primary,
-                ),
-                trailing: Icon(
-                  Icons.arrow_forward_ios,
-                  color: primary,
-                ),
-              ),
+            OptionTile(
+              title: 'My Orders',
+              leading: Icons.fastfood,
+              trailing: Icons.arrow_forward_ios,
+              action: () => _navigateTo(MyOrders()),
             ),
-            Card(
-              color: bg,
-              child: ListTile(
-                title: Text(
-                  'My Favourites',
-                ),
-                leading: Icon(
-                  Icons.favorite,
-                  color: primary,
-                ),
-                trailing: Icon(
-                  Icons.arrow_forward_ios,
-                  color: primary,
-                ),
-              ),
+            OptionTile(
+              title: 'My Favourites',
+              leading: Icons.favorite,
+              trailing: Icons.arrow_forward_ios,
+              action: () => _navigateTo(MyFavorites()),
             ),
-            Card(
-              color: bg,
-              child: ListTile(
-                title: Text(
-                  'Share',
-                ),
-                leading: Icon(
-                  Icons.share,
-                  color: primary,
-                ),
-              ),
+            OptionTile(
+              title: 'Share',
+              leading: Icons.share,
             ),
-            Card(
-              color: bg,
-              child: ListTile(
-                title: Text(
-                  'FAQ',
-                ),
-                leading: Icon(
-                  Icons.info,
-                  color: primary,
-                ),
-              ),
+            OptionTile(
+              title: 'FAQ',
+              leading: Icons.info,
             ),
+            OptionTile(
+              title: 'Logout',
+              leading: Icons.exit_to_app,
+              action: () => _handleSignout(context),
+            )
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSignout(BuildContext context) {
-    return IconButton(
-      icon: Icon(Icons.exit_to_app),
-      onPressed: () async {
-        bool signout = false;
-        signout = await showDialog<bool>(
-          context: context,
-          builder: (_) => DialogBox(
-              title: 'Confirm',
-              description: 'Are you sure you want to Sign out ?',
-              buttonText1: 'No',
-              button1Func: () =>
-                  Navigator.of(context, rootNavigator: true).pop(false),
-              buttonText2: 'Yes',
-              button2Func: () =>
-                  Navigator.of(context, rootNavigator: true).pop(true)),
-        );
-        if (signout) {
-          AuthService().signOut();
-          Navigator.of(context).pushReplacement(goTo(AuthScreen()));
-        }
-      },
+  void _navigateTo(Widget screen) => Navigator.of(context).push(
+        MaterialPageRoute(
+            builder: (_) => MultiProvider(providers: [
+                  ChangeNotifierProvider<CurrentUser>.value(value: user),
+                  ChangeNotifierProvider<Cart>.value(value: cart),
+                  ChangeNotifierProvider<Menu>.value(value: menu),
+                ], child: screen)),
+      );
+
+  void _handleSignout(BuildContext context) async {
+    bool signout = false;
+    signout = await showDialog<bool>(
+      context: context,
+      builder: (_) => DialogBox(
+          title: 'Confirm',
+          description: 'Are you sure you want to Sign out ?',
+          buttonText1: 'No',
+          button1Func: () =>
+              Navigator.of(context, rootNavigator: true).pop(false),
+          buttonText2: 'Yes',
+          button2Func: () =>
+              Navigator.of(context, rootNavigator: true).pop(true)),
+    );
+    if (signout) {
+      AuthService().signOut();
+      Navigator.of(context).pushReplacement(goTo(AuthScreen()));
+    }
+  }
+}
+
+class OptionTile extends StatelessWidget {
+  final String title;
+  final IconData leading, trailing;
+  final Function action;
+  const OptionTile({
+    Key key,
+    @required this.title,
+    @required this.leading,
+    this.trailing,
+    this.action,
+  }) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: bg,
+      child: ListTile(
+        title: Text(
+          title,
+        ),
+        leading: Icon(
+          leading,
+          color: primary,
+        ),
+        trailing: trailing != null
+            ? Icon(
+                Icons.arrow_forward_ios,
+                color: primary,
+              )
+            : null,
+        onTap: () {
+          // print('tapped $title');
+          action();
+        },
+      ),
     );
   }
 }

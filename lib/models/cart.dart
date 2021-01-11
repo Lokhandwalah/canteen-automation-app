@@ -1,5 +1,4 @@
 import 'package:canteen/services/database.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -38,8 +37,14 @@ class Cart with ChangeNotifier {
     notifyListeners();
   }
 
+  void deleteItem(String oldItem) {
+    items.remove(oldItem);
+    DBService().updateCart(user, items);
+  }
+
   void removeAllItems() {
     items = {};
+    DBService().updateCart(user, items);
     notifyListeners();
   }
 
